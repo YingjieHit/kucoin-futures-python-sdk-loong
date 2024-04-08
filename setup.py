@@ -14,7 +14,7 @@ setup(
     author_email="grape.zhang@kucoin.com",
     url='https://github.com/Kucoin/kucoin-futures-python-sdk',
     description="kucoin-futures-api-sdk",
-    install_requires=['requests', 'websockets'],
+    install_requires=['requests', 'websockets', 'aiohttp'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
