@@ -30,84 +30,49 @@ class KucoinFuturesBaseRestApiAsync(object):
         # TODO: 该功能未实现
         self.TCP_NODELAY = 0
 
-    async def _request(self, method, uri, timeout=5, auth=True, params=None):
-        uri_path = uri
-        data_json = ''
-        if method in ['GET', 'DELETE']:
-            if params:
-                strl = []
-                for key in sorted(params):
-                    strl.append("{}={}".format(key, params[key]))
-                data_json += '&'.join(strl)
-                uri += '?' + data_json
-                uri_path = uri
-        else:
-            if params:
-                data_json= json.dumps(params)
+        self.base_url = "https://api-sandbox-futures.kucoin.com" if is_sandbox else "https://api-futures.kucoin.com"
 
-                uri_path = uri + data_json
-
-        headers = {}
-        if auth:
-            now_time = int(time.time()) * 1000
-            str_to_sign = str(now_time) + method + uri_path
-            sign = base64.b64encode(
-                hmac.new(self.secret.encode('utf-8'), str_to_sign.encode('utf-8'), hashlib.sha256).digest())
-            if self.is_v1api:
-                headers = {
-                    "KC-API-SIGN": sign,
-                    "KC-API-TIMESTAMP": str(now_time),
-                    "KC-API-KEY": self.key,
-                    "KC-API-PASSPHRASE": self.passphrase,
-                    "Content-Type": "application/json"
-                }
-            else:
-                passphrase = base64.b64encode(
-                    hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'), hashlib.sha256).digest())
-                headers = {
-                    "KC-API-SIGN": sign,
-                    "KC-API-TIMESTAMP": str(now_time),
-                    "KC-API-KEY": self.key,
-                    "KC-API-PASSPHRASE": passphrase,
-                    "Content-Type": "application/json",
-                    "KC-API-KEY-VERSION": "2"
-                }
-        headers["User-Agent"] = "kucoin-futures-python-sdk/" + version
-        url = urljoin(self.url, uri)
-
-        # superReq = requests
-        # if self.TCP_NODELAY == 1:
-        #     superReq = requests.Session()
-        #     adapter = requests.adapters.HTTPAdapter()
-        #     adapter.socket_options = [
-        #         (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        #     ]
-        #     superReq.mount('https://', adapter)
+    async def _request(self, method, endpoint, params=None):
+        url = urljoin(self.base_url, endpoint)
+        ts = str(int(time.time() * 1000))
+        headers = self._create_headers(method, endpoint, ts, params)
 
         async with aiohttp.ClientSession() as session:
             if method in ['GET', 'DELETE']:
-                async with session.request(method, url, headers=headers, timeout=timeout) as response:
-                    response_data = await self.check_response_data(response)
+                async with session.request(method, url, headers=headers, params=params) as response:
+                    return await response.json()
             else:
-                async with session.request(method, url, headers=headers, data=data_json, timeout=timeout) as response:
-                    response_data = await self.check_response_data(response)
+                async with session.request(method, url, headers=headers, json=params) as response:
+                    return await response.json()
 
-        return response_data
+    def _create_headers(self, method, endpoint, timestamp, params):
+        # Create pre-sign string
+        pre_sign_str = timestamp + method.upper() + endpoint
+        if method == 'GET' and params:
+            query_string = '&'.join([f"{key}={value}" for key, value in sorted(params.items())])
+            pre_sign_str += f"?{query_string}"
+        elif params:
+            pre_sign_str += json.dumps(params)
 
-    @staticmethod
-    async def check_response_data(response):
-        if response.status == 200:
-            try:
-                data = await response.json()
-                if data.get('code') == '200000':
-                    return data.get('data', data)
-                else:
-                    raise Exception(f"API Error: {data.get('code')} - {data.get('msg')}")
-            except ValueError:
-                raise Exception(f"Non-JSON response: {await response.text()}")
-        else:
-            raise Exception(f"HTTP Error: {response.status} - {await response.text()}")
+        # Create signature
+        signature = base64.b64encode(
+            hmac.new(self.secret.encode('utf-8'), pre_sign_str.encode('utf-8'), hashlib.sha256).digest()).decode(
+            'utf-8')
 
+        # Create passphrase
+        passphrase = base64.b64encode(hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'),
+                                               hashlib.sha256).digest()).decode('utf-8')
+
+        headers = {
+            "KC-API-SIGN": signature,
+            "KC-API-TIMESTAMP": timestamp,
+            "KC-API-KEY": self.key,
+            "KC-API-PASSPHRASE": passphrase,
+            "KC-API-KEY-VERSION": "2",
+            "Content-Type": "application/json"
+        }
+
+        return headers
 
     @property
     def return_unique_id(self):
