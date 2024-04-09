@@ -7,6 +7,12 @@ from uuid import uuid1
 from urllib.parse import urljoin
 import aiohttp
 
+try:
+    import pkg_resources
+    version = 'v' + pkg_resources.get_distribution("kucoin-futures-python").version
+except (ModuleNotFoundError, pkg_resources.DistributionNotFound):
+    version = 'v1.0.0'
+
 
 class KucoinFuturesBaseRestApiAsync(object):
     def __init__(self, key='', secret='', passphrase='', is_sandbox=False, url='', is_v1api=False):
@@ -14,61 +20,82 @@ class KucoinFuturesBaseRestApiAsync(object):
             self.url = url
         else:
             if is_sandbox:
-                self.url = 'https://api-sandbox-futures.kucoin.com'
+               self.url = 'https://api-sandbox-futures.kucoin.com'
             else:
                 self.url = 'https://api-futures.kucoin.com'
         self.key = key
         self.secret = secret
         self.passphrase = passphrase
         self.is_v1api = is_v1api
+        # TODO: 该功能未实现
+        self.TCP_NODELAY = 0
 
     async def _request(self, method, uri, timeout=5, auth=True, params=None):
         uri_path = uri
         data_json = ''
         if method in ['GET', 'DELETE']:
             if params:
-                query_string = '&'.join([f"{key}={value}" for key, value in sorted(params.items())])
-                uri_path = f"{uri}?{query_string}"
+                strl = []
+                for key in sorted(params):
+                    strl.append("{}={}".format(key, params[key]))
+                data_json += '&'.join(strl)
+                uri += '?' + data_json
+                uri_path = uri
         else:
             if params:
-                data_json = json.dumps(params)
-                uri_path += data_json
+                data_json= json.dumps(params)
 
-        headers = self._generate_headers(method, uri_path, auth)
+                uri_path = uri + data_json
 
-        async with aiohttp.ClientSession() as session:
-            async with session.request(method, urljoin(self.url, uri), headers=headers, data=data_json if method not in ['GET', 'DELETE'] else None, timeout=timeout) as response:
-                return await self._check_response_data(response)
-
-    def _generate_headers(self, method, uri_path, auth):
-        headers = {"Content-Type": "application/json"}
+        headers = {}
         if auth:
-            now = int(time.time() * 1000)
-            str_to_sign = f"{now}{method}{uri_path}"
+            now_time = int(time.time()) * 1000
+            str_to_sign = str(now_time) + method + uri_path
             sign = base64.b64encode(
-                hmac.new(self.secret.encode('utf-8'), str_to_sign.encode('utf-8'), hashlib.sha256).digest()).decode()
-
+                hmac.new(self.secret.encode('utf-8'), str_to_sign.encode('utf-8'), hashlib.sha256).digest())
             if self.is_v1api:
-                headers.update({
+                headers = {
                     "KC-API-SIGN": sign,
-                    "KC-API-TIMESTAMP": str(now),
+                    "KC-API-TIMESTAMP": str(now_time),
                     "KC-API-KEY": self.key,
                     "KC-API-PASSPHRASE": self.passphrase,
-                })
+                    "Content-Type": "application/json"
+                }
             else:
-                passphrase = base64.b64encode(hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'),
-                                                       hashlib.sha256).digest()).decode()
-                headers.update({
+                passphrase = base64.b64encode(
+                    hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'), hashlib.sha256).digest())
+                headers = {
                     "KC-API-SIGN": sign,
-                    "KC-API-TIMESTAMP": str(now),
+                    "KC-API-TIMESTAMP": str(now_time),
                     "KC-API-KEY": self.key,
                     "KC-API-PASSPHRASE": passphrase,
-                    "KC-API-VERSION": "2",
-                })
-            return headers
+                    "Content-Type": "application/json",
+                    "KC-API-KEY-VERSION": "2"
+                }
+        headers["User-Agent"] = "kucoin-futures-python-sdk/" + version
+        url = urljoin(self.url, uri)
+
+        # superReq = requests
+        # if self.TCP_NODELAY == 1:
+        #     superReq = requests.Session()
+        #     adapter = requests.adapters.HTTPAdapter()
+        #     adapter.socket_options = [
+        #         (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        #     ]
+        #     superReq.mount('https://', adapter)
+
+        async with aiohttp.ClientSession() as session:
+            if method in ['GET', 'DELETE']:
+                async with session.request(method, url, headers=headers, timeout=timeout) as response:
+                    response_data = await self.check_response_data(response)
+            else:
+                async with session.request(method, url, headers=headers, data=data_json, timeout=timeout) as response:
+                    response_data = await self.check_response_data(response)
+
+        return response_data
 
     @staticmethod
-    async def _check_response_data(response):
+    async def check_response_data(response):
         if response.status == 200:
             try:
                 data = await response.json()
@@ -80,6 +107,7 @@ class KucoinFuturesBaseRestApiAsync(object):
                 raise Exception(f"Non-JSON response: {await response.text()}")
         else:
             raise Exception(f"HTTP Error: {response.status} - {await response.text()}")
+
 
     @property
     def return_unique_id(self):
