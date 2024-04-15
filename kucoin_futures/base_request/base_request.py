@@ -104,6 +104,7 @@ class KucoinFuturesBaseRestApi(object):
         else:
             response_data = superReq.request(method, url, headers=headers, data=data_json,
                                              timeout=timeout)
+
         return self.check_response_data(response_data)
 
     @staticmethod

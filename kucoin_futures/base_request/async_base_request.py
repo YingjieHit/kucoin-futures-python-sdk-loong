@@ -9,6 +9,7 @@ import aiohttp
 
 try:
     import pkg_resources
+
     version = 'v' + pkg_resources.get_distribution("kucoin-futures-python").version
 except (ModuleNotFoundError, pkg_resources.DistributionNotFound):
     version = 'v1.0.0'
@@ -20,7 +21,7 @@ class KucoinFuturesBaseRestApiAsync(object):
             self.url = url
         else:
             if is_sandbox:
-               self.url = 'https://api-sandbox-futures.kucoin.com'
+                self.url = 'https://api-sandbox-futures.kucoin.com'
             else:
                 self.url = 'https://api-futures.kucoin.com'
         self.key = key
@@ -35,7 +36,16 @@ class KucoinFuturesBaseRestApiAsync(object):
     async def _request(self, method, endpoint, params=None):
         url = urljoin(self.base_url, endpoint)
         ts = str(int(time.time() * 1000))
+        # ts = str(int(time.time()) * 1000)
         headers = self._create_headers(method, endpoint, ts, params)
+
+        # data_json = ''
+        # if method in ['GET', 'DELETE']:
+        #     if params:
+        #         strl = []
+        #         for key in sorted(params):
+        #             strl.append("{}={}".format(key, params[key]))
+        #         data_json += '&'.join(strl)
 
         async with aiohttp.ClientSession() as session:
             if method in ['GET', 'DELETE']:
@@ -48,7 +58,7 @@ class KucoinFuturesBaseRestApiAsync(object):
     def _create_headers(self, method, endpoint, timestamp, params):
         # Create pre-sign string
         pre_sign_str = timestamp + method.upper() + endpoint
-        if method == 'GET' and params:
+        if method in ['GET', 'DELETE'] and params:
             query_string = '&'.join([f"{key}={value}" for key, value in sorted(params.items())])
             pre_sign_str += f"?{query_string}"
         elif params:
@@ -56,8 +66,7 @@ class KucoinFuturesBaseRestApiAsync(object):
 
         # Create signature
         signature = base64.b64encode(
-            hmac.new(self.secret.encode('utf-8'), pre_sign_str.encode('utf-8'), hashlib.sha256).digest()).decode(
-            'utf-8')
+            hmac.new(self.secret.encode('utf-8'), pre_sign_str.encode('utf-8'), hashlib.sha256).digest()).decode('utf-8')
 
         # Create passphrase
         passphrase = base64.b64encode(hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'),
