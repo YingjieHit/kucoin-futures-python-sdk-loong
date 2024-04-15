@@ -115,6 +115,35 @@ class TradeDataAsync(KucoinFuturesBaseRestApiAsync):
 
         return await self._request('POST', '/api/v1/orders', params=params)
 
+    async def create_market_maker_order(self, symbol, lever, size, price_buy, price_sell,
+                                        client_oid_buy='', client_oid_sell='', post_only=True):
+        params = [
+            {
+                'symbol': symbol,
+                'size': size,
+                'side': 'buy',
+                'price': price_buy,
+                'leverage': lever,
+                'type': 'limit',
+                'postOnly': post_only,
+            },
+            {
+                'symbol': symbol,
+                'size': size,
+                'side': 'sell',
+                'price': price_sell,
+                'leverage': lever,
+                'type': 'limit',
+                'postOnly': post_only,
+            }
+        ]
+        if not client_oid_buy:
+            params[0]['clientOid'] = self.return_unique_id
+        if not  client_oid_sell:
+            params[1]['clientOid'] = self.return_unique_id
+
+        return await self._request('POST', '/api/v1/orders/multi', params=params)
+
     async def cancel_order(self, orderId):
         return await self._request('DELETE', f'/api/v1/orders/{orderId}')
 
