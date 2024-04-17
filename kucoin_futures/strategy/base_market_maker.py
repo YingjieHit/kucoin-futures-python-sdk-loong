@@ -46,6 +46,9 @@ class BaseMarketMaker(object):
 
         self.enable = True
 
+        while True:
+            await asyncio.sleep(60 * 60 * 24)
+
     async def execute_order(self):
         while True:
             event = await self.order_task_queue.get()
