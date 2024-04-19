@@ -1,4 +1,5 @@
 
+from decimal import Decimal, getcontext, ROUND_HALF_UP
 from kucoin_futures.strategy.object import Ticker, Order
 
 
@@ -46,6 +47,29 @@ class Utils(object):
             liquidity=order_data.get('liquidity', ''),  # "liquidity": "maker", // 成交方向，取taker一方的買賣方向
             ts=order_data.get('ts', 0)  # "ts": 1545914149935808589 // 時間戳（撮合時間）
         )
+
+    @staticmethod
+    def round_decimal(value, n):
+        """
+        Rounds a float to at most n decimal places.
+
+        Args:
+        value (float): The number to be rounded.
+        n (int): The maximum number of decimal places to keep.
+
+        Returns:
+        Decimal: The rounded number as a Decimal, to maintain precision.
+        """
+        # 设置 Decimal 的精度和四舍五入模式
+        getcontext().prec = 28  # 设置足够的精度以处理常见情况
+        getcontext().rounding = ROUND_HALF_UP
+
+        # 使用 Decimal 进行计算
+        decimal_value = Decimal(value)
+        rounding_factor = Decimal('1.' + '0' * n)
+        rounded_value = decimal_value.quantize(Decimal('1.' + '0' * n), rounding=ROUND_HALF_UP)
+
+        return rounded_value
 
 
 utils = Utils()
