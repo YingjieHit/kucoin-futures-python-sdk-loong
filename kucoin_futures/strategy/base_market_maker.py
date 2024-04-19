@@ -53,25 +53,28 @@ class BaseMarketMaker(object):
             await asyncio.sleep(60 * 60 * 24)
 
     async def execute_order(self):
-        while True:
-            event = await self.order_task_queue.get()
-            if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
-                # 发送做市单
-                print("收到做市订单")
-                mmo: MarketMakerCreateOrder = event.data
-                await self.trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
-                                                           mmo.price_sell, mmo.client_oid_buy,
-                                                           mmo.client_oid_sell, mmo.post_only)
-            elif event.type == EventType.CREATE_ORDER:
-                # 发送订单
-                co: CreateOrder = event.data
-                if co.type == 'limit':
-                    await self.trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price, co.client_oid,
-                                                        postOnly=co.post_only)
-                elif co.type == 'market':
-                    await  self.trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
-                                                          postOnly=co.post_only)
-
+        try:
+            while True:
+                event = await self.order_task_queue.get()
+                if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
+                    # 发送做市单
+                    mmo: MarketMakerCreateOrder = event.data
+                    res = await self.trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
+                                                                     mmo.price_sell, mmo.client_oid_buy,
+                                                                     mmo.client_oid_sell, mmo.post_only)
+                    print(f"订单执行结果{res}")
+                elif event.type == EventType.CREATE_ORDER:
+                    # 发送订单
+                    co: CreateOrder = event.data
+                    if co.type == 'limit':
+                        await self.trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
+                                                            co.client_oid,
+                                                            postOnly=co.post_only)
+                    elif co.type == 'market':
+                        await  self.trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
+                                                              postOnly=co.post_only)
+        except Exception as e:
+            print(f"execute_order_process Error {str(e)}")
 
     async def process_cancel_order(self):
         while True:
@@ -131,7 +134,7 @@ class BaseMarketMaker(object):
             post_only=post_only
         )
         await self.order_task_queue.put(CreateMarketMakerOrderEvent(mm_order))
-    
+
     async def create_order(self, symbol, side, size, type, price, lever, client_oid, post_only=True):
         co = CreateOrder(
             symbol=symbol,
