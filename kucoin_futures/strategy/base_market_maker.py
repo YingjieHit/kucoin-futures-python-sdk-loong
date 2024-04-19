@@ -141,7 +141,7 @@ class BaseMarketMaker(object):
         )
         await self.order_task_queue.put(CreateMarketMakerOrderEvent(mm_order))
 
-    async def create_order(self, symbol, side, size, type, price, lever, client_oid, post_only=True):
+    async def create_order(self, symbol, side, size, type, price, lever, client_oid='', post_only=True):
         co = CreateOrder(
             symbol=symbol,
             lever=lever,
