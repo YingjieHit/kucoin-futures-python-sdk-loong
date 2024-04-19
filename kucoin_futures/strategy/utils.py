@@ -66,7 +66,6 @@ class Utils(object):
 
         # 使用 Decimal 进行计算
         decimal_value = Decimal(value)
-        rounding_factor = Decimal('1.' + '0' * n)
         rounded_value = decimal_value.quantize(Decimal('1.' + '0' * n), rounding=ROUND_HALF_UP)
 
         return rounded_value
