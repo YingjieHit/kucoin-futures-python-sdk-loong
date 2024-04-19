@@ -17,6 +17,7 @@ class BaseMarketMaker(object):
         self.symbol = symbol
         self.event_queue = asyncio.Queue()  # 用于存储数据计算因子
         self.order_task_queue = asyncio.Queue()  # 用于下单任务通讯
+        self.cancel_order_task_queue = asyncio.Queue()  # 用于撤单任务通讯
         self.client = WsToken(key=key,
                               secret=secret,
                               passphrase=passphrase,
@@ -31,6 +32,8 @@ class BaseMarketMaker(object):
         process_event_task = asyncio.create_task(self.process_event())
         # 创建交易执行任务
         execute_order_task = asyncio.create_task(self.execute_order())
+        # 创建撤单执行任务
+        cancel_order_task = asyncio.create_task(self.process_cancel_order())
 
         # 创建ws_client
         self.ws_public_client = await KucoinFuturesWsClient.create(None, self.client, self.deal_public_msg,
@@ -68,7 +71,11 @@ class BaseMarketMaker(object):
                     await  self.trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
                                                           postOnly=co.post_only)
 
-            elif event.type == EventType.CANCEL_ALL_ORDER:
+
+    async def process_cancel_order(self):
+        while True:
+            event = await self.cancel_order_task_queue.get()
+            if event.type == EventType.CANCEL_ALL_ORDER:
                 # 撤销所有订单
                 symbol = event.data
                 await self.trade.cancel_all_limit_order(symbol)
@@ -127,10 +134,10 @@ class BaseMarketMaker(object):
     async def cancel_all_order(self, symbol: str = None):
         if not symbol:
             symbol = self.symbol
-        await self.order_task_queue.put(CancelAllOrderEvent(symbol))
+        await self.cancel_order_task_queue.put(CancelAllOrderEvent(symbol))
 
     async def cancel_order_by_order_id(self, order_id: str):
-        await self.order_task_queue.put(CancelOrder(order_id=order_id))
+        await self.cancel_order_task_queue.put(CancelOrder(order_id=order_id))
 
     async def cancel_order_by_client_oid(self, symbol, client_oid):
-        await self.order_task_queue.put(CancelOrder(symbol=symbol, client_oid=client_oid))
+        await self.cancel_order_task_queue.put(CancelOrder(symbol=symbol, client_oid=client_oid))
