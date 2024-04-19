@@ -77,20 +77,23 @@ class BaseMarketMaker(object):
             print(f"execute_order_process Error {str(e)}")
 
     async def process_cancel_order(self):
-        while True:
-            event = await self.cancel_order_task_queue.get()
-            if event.type == EventType.CANCEL_ALL_ORDER:
-                # 撤销所有订单
-                symbol = event.data
-                await self.trade.cancel_all_limit_order(symbol)
+        try:
+            while True:
+                event = await self.cancel_order_task_queue.get()
+                if event.type == EventType.CANCEL_ALL_ORDER:
+                    # 撤销所有订单
+                    symbol = event.data
+                    await self.trade.cancel_all_limit_order(symbol)
 
-            elif event.type == EventType.CANCEL_ORDER:
-                # 撤单
-                co: CancelOrder = event.data
-                if co.client_oid:
-                    await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
-                else:
-                    await self.trade.cancel_order(co.order_id)
+                elif event.type == EventType.CANCEL_ORDER:
+                    # 撤单
+                    co: CancelOrder = event.data
+                    if co.client_oid:
+                        await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
+                    else:
+                        await self.trade.cancel_order(co.order_id)
+        except Exception as e:
+            print(f"process_cancel_order Error {str(e)}")
 
     async def on_tick(self, ticker: Ticker):
         print("需要实现on_tick")
@@ -100,14 +103,17 @@ class BaseMarketMaker(object):
 
     async def process_event(self):
         """处理事件"""
-        while True:
-            event = await self.event_queue.get()
-            if event.type == EventType.TICKER:
-                # 处理ticker
-                await self.on_tick(event.data)
-            elif event.type == EventType.TRADE_ORDER:
-                # 处理order回报
-                await self.on_order(event.data)
+        try:
+            while True:
+                event = await self.event_queue.get()
+                if event.type == EventType.TICKER:
+                    # 处理ticker
+                    await self.on_tick(event.data)
+                elif event.type == EventType.TRADE_ORDER:
+                    # 处理order回报
+                    await self.on_order(event.data)
+        except Exception as e:
+            print(f"process_event Error {str(e)}")
 
     async def deal_public_msg(self, msg):
         data = msg.get('data')
