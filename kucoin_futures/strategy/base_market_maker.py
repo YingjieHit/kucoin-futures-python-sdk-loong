@@ -130,6 +130,19 @@ class BaseMarketMaker(object):
             post_only=post_only
         )
         await self.order_task_queue.put(CreateMarketMakerOrderEvent(mm_order))
+    
+    async def create_order(self, symbol, side, size, type, price, lever, client_oid, post_only=True):
+        co = CreateOrder(
+            symbol=symbol,
+            lever=lever,
+            size=size,
+            side=side,
+            price=price,
+            type=type,
+            client_oid=client_oid,
+            post_only=post_only
+        )
+        await self.order_task_queue.put(CreateOrderEvent(co))
 
     async def cancel_all_order(self, symbol: str = None):
         if not symbol:
