@@ -57,6 +57,7 @@ class BaseMarketMaker(object):
             event = await self.order_task_queue.get()
             if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
                 # 发送做市单
+                print("收到做市订单")
                 mmo: MarketMakerCreateOrder = event.data
                 await self.trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
                                                            mmo.price_sell, mmo.client_oid_buy,
