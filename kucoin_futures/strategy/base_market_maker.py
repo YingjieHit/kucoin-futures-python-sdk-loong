@@ -10,6 +10,7 @@ from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEv
 from kucoin_futures.strategy.enums import Subject
 from kucoin_futures.strategy.utils import utils
 from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder
+from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseMarketMaker(object):
@@ -53,8 +54,8 @@ class BaseMarketMaker(object):
             await asyncio.sleep(60 * 60 * 24)
 
     async def execute_order(self):
-        try:
-            while True:
+        while True:
+            try:
                 event = await self.order_task_queue.get()
                 if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
                     # 发送做市单
@@ -62,7 +63,7 @@ class BaseMarketMaker(object):
                     res = await self.trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
                                                                      mmo.price_sell, mmo.client_oid_buy,
                                                                      mmo.client_oid_sell, mmo.post_only)
-                    print(f"订单执行结果{res}")
+                    # app_logger.info_logger(f"订单执行结果{res}")
                 elif event.type == EventType.CREATE_ORDER:
                     # 发送订单
                     co: CreateOrder = event.data
@@ -72,13 +73,13 @@ class BaseMarketMaker(object):
                                                             postOnly=co.post_only)
                     elif co.type == 'market':
                         await  self.trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
-                                                              postOnly=co.post_only)
-        except Exception as e:
-            print(f"execute_order_process Error {str(e)}")
+                                                                  postOnly=co.post_only)
+            except Exception as e:
+                app_logger.error(f"execute_order_process Error {str(e)}")
 
     async def process_cancel_order(self):
-        try:
-            while True:
+        while True:
+            try:
                 event = await self.cancel_order_task_queue.get()
                 if event.type == EventType.CANCEL_ALL_ORDER:
                     # 撤销所有订单
@@ -92,19 +93,19 @@ class BaseMarketMaker(object):
                         await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
                     else:
                         await self.trade.cancel_order(co.order_id)
-        except Exception as e:
-            print(f"process_cancel_order Error {str(e)}")
+            except Exception as e:
+                app_logger.error(f"process_cancel_order Error {str(e)}")
 
     async def on_tick(self, ticker: Ticker):
-        print("需要实现on_tick")
+        raise NotImplementedError("需要实现on_tick")
 
     async def on_order(self, order: Order):
-        print("需要实现on_order")
+        raise NotImplementedError("需要实现on_order")
 
     async def process_event(self):
         """处理事件"""
-        try:
-            while True:
+        while True:
+            try:
                 event = await self.event_queue.get()
                 if event.type == EventType.TICKER:
                     # 处理ticker
@@ -112,8 +113,8 @@ class BaseMarketMaker(object):
                 elif event.type == EventType.TRADE_ORDER:
                     # 处理order回报
                     await self.on_order(event.data)
-        except Exception as e:
-            print(f"process_event Error {str(e)}")
+            except Exception as e:
+                app_logger.error(f"process_event Error {str(e)}")
 
     async def deal_public_msg(self, msg):
         data = msg.get('data')

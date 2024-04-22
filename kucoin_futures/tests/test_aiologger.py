@@ -14,6 +14,9 @@ async def main():
     # 将文件处理器添加到日志器
     logger.add_handler(file_handler)
 
+    await file_handler.close()
+    logger.remove_handler(file_handler)
+
     # 记录一些日志信息
     await logger.debug("这是一条debug信息")
     await logger.info("这是一条info信息")
