@@ -4,14 +4,16 @@ from aiologger.handlers.files import AsyncFileHandler
 from pathlib import Path
 
 class AppLogger(object):
-    def __init__(self, level='DEBUG', info_log_path=None, error_log_path=None):
+    def __init__(self, info_log_path=None, error_log_path=None):
         if info_log_path is None:
             info_log_path = 'info.log'
         if error_log_path is None:
             error_log_path = 'error.log'
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
-        self.logger = Logger(level=level)
+
+        self.info_logger = Logger(level='INFO')
+        self.error_logger = Logger(level='ERROR')
         self.setup_logger()
 
     async def setup_logger(self):
@@ -26,14 +28,15 @@ class AppLogger(object):
         error_handler = AsyncFileHandler(filename=str(self.error_log_path))
         error_handler.level = 'ERROR'
 
-        self.logger.add_handler(info_handler)
-        self.logger.add_handler(error_handler)
+        self.info_logger.add_handler(info_handler)
+        self.error_logger.add_handler(error_handler)
 
     async def info(self, message):
-        await self.logger.info(message)
+        await self.info_logger.info(message)
 
     async def error(self, message):
-        await self.logger.error(message)
+        await self.error_logger.error(message)
 
     async def shutdown(self):
-        await self.logger.shutdown()
+        await self.info_logger.shutdown()
+        await self.error_logger.shutdown()
