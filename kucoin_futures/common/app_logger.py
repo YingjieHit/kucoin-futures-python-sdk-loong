@@ -17,7 +17,7 @@ class AppLogger(object):
         self.error_logger = Logger(level=LogLevel.ERROR)
         self.setup_logger()
 
-    async def setup_logger(self):
+    def setup_logger(self):
         # 确保日志目录存在，如果不存在则创建
         self.info_log_path.parent.mkdir(parents=True, exist_ok=True)
         self.error_log_path.parent.mkdir(parents=True, exist_ok=True)
