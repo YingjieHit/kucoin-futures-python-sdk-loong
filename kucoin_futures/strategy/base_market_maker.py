@@ -63,7 +63,7 @@ class BaseMarketMaker(object):
                     res = await self.trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
                                                                      mmo.price_sell, mmo.client_oid_buy,
                                                                      mmo.client_oid_sell, mmo.post_only)
-                    # app_logger.info_logger(f"订单执行结果{res}")
+                    # await app_logger.info_logger(f"订单执行结果{res}")
                 elif event.type == EventType.CREATE_ORDER:
                     # 发送订单
                     co: CreateOrder = event.data
@@ -75,7 +75,7 @@ class BaseMarketMaker(object):
                         await  self.trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
                                                                   postOnly=co.post_only)
             except Exception as e:
-                app_logger.error(f"execute_order_process Error {str(e)}")
+                await app_logger.error(f"execute_order_process Error {str(e)}")
 
     async def process_cancel_order(self):
         while True:
@@ -94,7 +94,7 @@ class BaseMarketMaker(object):
                     else:
                         await self.trade.cancel_order(co.order_id)
             except Exception as e:
-                app_logger.error(f"process_cancel_order Error {str(e)}")
+                await app_logger.error(f"process_cancel_order Error {str(e)}")
 
     async def on_tick(self, ticker: Ticker):
         raise NotImplementedError("需要实现on_tick")
@@ -114,7 +114,7 @@ class BaseMarketMaker(object):
                     # 处理order回报
                     await self.on_order(event.data)
             except Exception as e:
-                app_logger.error(f"process_event Error {str(e)}")
+                await app_logger.error(f"process_event Error {str(e)}")
 
     async def deal_public_msg(self, msg):
         data = msg.get('data')
