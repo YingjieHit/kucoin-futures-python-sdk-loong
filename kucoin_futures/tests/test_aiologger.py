@@ -2,6 +2,8 @@ import asyncio
 from aiologger import Logger
 from aiologger.handlers.files import AsyncFileHandler
 from aiologger.levels import LogLevel
+from aiologger.formatters.base import Formatter
+
 
 async def main():
     # 创建一个日志器
@@ -14,8 +16,12 @@ async def main():
     # 将文件处理器添加到日志器
     logger.add_handler(file_handler)
 
-    await file_handler.close()
-    logger.remove_handler(file_handler)
+    # 创建并设置日志格式化器
+    formatter = Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.formatter = formatter
+
+    # await file_handler.close()
+    # logger.remove_handler(file_handler)
 
     # 记录一些日志信息
     await logger.debug("这是一条debug信息")

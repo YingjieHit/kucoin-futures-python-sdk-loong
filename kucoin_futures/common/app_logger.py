@@ -2,6 +2,7 @@ import asyncio
 from aiologger import Logger
 from aiologger.handlers.files import AsyncFileHandler
 from aiologger.levels import LogLevel
+from aiologger.formatters.base import Formatter
 from pathlib import Path
 
 class AppLogger(object):
@@ -25,6 +26,10 @@ class AppLogger(object):
         self.info_logger.add_handler(self.info_handler)
         self.error_logger.add_handler(self.error_handler)
 
+        self.formatter = Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        self.info_handler.formatter = self.formatter
+        self.error_handler.formatter = self.formatter
+
     async def info(self, message):
         await self.info_logger.info(message)
 
@@ -43,6 +48,7 @@ class AppLogger(object):
         self.info_log_path = Path(info_log_path)
         self.info_handler = AsyncFileHandler(filename=str(self.info_log_path), mode='a')
         self.info_logger.add_handler(self.info_handler)
+        self.info_handler.formatter = self.formatter
 
     async def set_error_path(self, error_log_path: str):
         # 关闭之前的error_handler，并且从error_logger移除
@@ -52,6 +58,7 @@ class AppLogger(object):
         self.error_log_path = Path(error_log_path)
         self.error_handler = AsyncFileHandler(filename=str(self.error_log_path), mode='a')
         self.error_logger.add_handler(self.error_handler)
+        self.error_handler.formatter = self.formatter
 
 
 app_logger = AppLogger()
