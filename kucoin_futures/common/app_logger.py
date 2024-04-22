@@ -5,6 +5,10 @@ from pathlib import Path
 
 class AppLogger(object):
     def __init__(self, level='DEBUG', info_log_path=None, error_log_path=None):
+        if info_log_path is None:
+            info_log_path = 'info.log'
+        if error_log_path is None:
+            error_log_path = 'error.log'
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
         self.logger = Logger(level=level)
