@@ -3,7 +3,7 @@ from aiologger import Logger
 from aiologger.handlers.files import AsyncFileHandler
 from pathlib import Path
 
-class AsyncLogger(object):
+class AppLogger(object):
     def __init__(self, level='DEBUG', info_log_path=None, error_log_path=None):
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
@@ -24,24 +24,11 @@ class AsyncLogger(object):
         self.logger.add_handler(info_handler)
         self.logger.add_handler(error_handler)
 
-    async def log_info(self, message):
+    async def info(self, message):
         await self.logger.info(message)
 
-    async def log_error(self, message):
+    async def error(self, message):
         await self.logger.error(message)
 
     async def shutdown(self):
         await self.logger.shutdown()
-
-async def log_sample():
-    logger_manager = AsyncLogger('/path/to/your/logs/info.log', '/path/to/your/logs/error.log')
-    await logger_manager.setup_logger()
-
-    await logger_manager.log_info("This is an info level log.")
-    await logger_manager.log_error("This is an error level log.")
-
-    # 关闭logger前清理资源
-    await logger_manager.shutdown()
-
-if __name__ == "__main__":
-    asyncio.run(log_sample())
