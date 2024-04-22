@@ -1,6 +1,7 @@
 import asyncio
 from aiologger import Logger
 from aiologger.handlers.files import AsyncFileHandler
+from aiologger.levels import LogLevel
 from pathlib import Path
 
 class AppLogger(object):
@@ -12,8 +13,8 @@ class AppLogger(object):
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
 
-        self.info_logger = Logger(level='INFO')
-        self.error_logger = Logger(level='ERROR')
+        self.info_logger = Logger(level=LogLevel.INFO)
+        self.error_logger = Logger(level=LogLevel.ERROR)
         self.setup_logger()
 
     async def setup_logger(self):
@@ -22,11 +23,9 @@ class AppLogger(object):
         self.error_log_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 创建并添加文件处理器
-        info_handler = AsyncFileHandler(filename=str(self.info_log_path))
-        info_handler.level = 'INFO'
+        info_handler = AsyncFileHandler(filename=str(self.info_log_path), mode='a')
 
-        error_handler = AsyncFileHandler(filename=str(self.error_log_path))
-        error_handler.level = 'ERROR'
+        error_handler = AsyncFileHandler(filename=str(self.error_log_path), mode='a')
 
         self.info_logger.add_handler(info_handler)
         self.error_logger.add_handler(error_handler)
