@@ -4,8 +4,9 @@ from aiologger.handlers.files import AsyncFileHandler
 from pathlib import Path
 
 
-class AppLogger(object):
-
+# 创建一个应用的日志类
+class AppLogger(Logger):
+    # 初始化方法，传入日志级别，日志文件路径，错误日志文件路径
     def __init__(self, level='INFO', info_log_path=None, error_log_path=None):
         if info_log_path is None:
             info_log_path = 'info.log'
@@ -15,37 +16,26 @@ class AppLogger(object):
         self.error_log_path = Path(error_log_path)
         self.logger = Logger(level=level)  # 设置为日志级别
         self.setup_logger()
-
+    
+    # 设置日志
     def setup_logger(self):
-        # 确保日志目录存在，如果不存在则创建
-        self.info_log_path.parent.mkdir(parents=True, exist_ok=True)
-        self.error_log_path.parent.mkdir(parents=True, exist_ok=True)
+        # 设置info日志
+        info_log_handler = AsyncFileHandler(self.info_log_path)
+        self.logger.addHandler(info_log_handler)
+        # 设置error日志
+        error_log_handler = AsyncFileHandler(self.error_log_path)
+        self.logger.addHandler(error_log_handler)
 
-        # 创建并添加文件处理器
-        info_handler = AsyncFileHandler(filename=str(self.info_log_path), level='INFO')
-        error_handler = AsyncFileHandler(filename=str(self.error_log_path), level='ERROR')
-        self.logger.add_handler(info_handler)
-        self.logger.add_handler(error_handler)
+    # info日志
+    async def info(self, msg):
+        await self.logger.info(msg)
 
-    async def info(self, message):
-        await self.logger.info(message)
-
-    async def error(self, message):
-        await self.logger.error(message)
-
+    # error日志
+    async def error(self, msg):
+        await self.logger.error(msg)
+    
+    # 关闭日志
     async def shutdown(self):
         await self.logger.shutdown()
 
-async def log_sample():
-    logger_manager = AppLogger('./info.log', './error.log')
 
-
-    await logger_manager.info("This is an info level log.")
-    await logger_manager.error("This is an error level log.")
-
-    # 关闭logger前清理资源
-    await logger_manager.shutdown()
-
-
-if __name__ == '__main__':
-    asyncio.run(log_sample())
