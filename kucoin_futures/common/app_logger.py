@@ -3,41 +3,45 @@ from aiologger import Logger
 from aiologger.handlers.files import AsyncFileHandler
 from pathlib import Path
 
-
-# 创建一个应用的日志类
-class AppLogger(object):
-    # 初始化方法，传入日志级别，日志文件路径，错误日志文件路径
-    def __init__(self, level='INFO', info_log_path=None, error_log_path=None):
-        if info_log_path is None:
-            info_log_path = 'info.log'
-        if error_log_path is None:
-            error_log_path = 'error.log'
+class AsyncLogger(object):
+    def __init__(self, level='DEBUG', info_log_path=None, error_log_path=None):
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
-        self.logger = Logger(level=level)  # 设置为日志级别
-        self.setup_logger()
-    
-    # 设置日志
-    def setup_logger(self):
-        # 设置info日志
-        print(self.info_log_path)
-        print(type(self.info_log_path))
-        # info_log_handler = AsyncFileHandler(self.info_log_path)
-        # self.logger.addHandler(info_log_handler)
-        # # 设置error日志
-        # error_log_handler = AsyncFileHandler(self.error_log_path)
-        # self.logger.addHandler(error_log_handler)
+        self.logger = Logger(level='level') 
 
-    # info日志
-    async def info(self, msg):
-        await self.logger.info(msg)
+    async def setup_logger(self):
+        # 确保日志目录存在，如果不存在则创建
+        self.info_log_path.parent.mkdir(parents=True, exist_ok=True)
+        self.error_log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # error日志
-    async def error(self, msg):
-        await self.logger.error(msg)
-    
-    # 关闭日志
+        # 创建并添加文件处理器
+        info_handler = AsyncFileHandler(filename=str(self.info_log_path))
+        info_handler.level = 'INFO'
+
+        error_handler = AsyncFileHandler(filename=str(self.error_log_path))
+        error_handler.level = 'ERROR'
+
+        self.logger.add_handler(info_handler)
+        self.logger.add_handler(error_handler)
+
+    async def log_info(self, message):
+        await self.logger.info(message)
+
+    async def log_error(self, message):
+        await self.logger.error(message)
+
     async def shutdown(self):
         await self.logger.shutdown()
 
+async def log_sample():
+    logger_manager = AsyncLogger('/path/to/your/logs/info.log', '/path/to/your/logs/error.log')
+    await logger_manager.setup_logger()
 
+    await logger_manager.log_info("This is an info level log.")
+    await logger_manager.log_error("This is an error level log.")
+
+    # 关闭logger前清理资源
+    await logger_manager.shutdown()
+
+if __name__ == "__main__":
+    asyncio.run(log_sample())
