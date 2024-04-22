@@ -12,6 +12,7 @@ class AppLogger(object):
         self.info_log_path = Path(info_log_path)
         self.error_log_path = Path(error_log_path)
         self.logger = Logger(level=level)
+        self.setup_logger()
 
     async def setup_logger(self):
         # 确保日志目录存在，如果不存在则创建
