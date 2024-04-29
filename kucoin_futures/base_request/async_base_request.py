@@ -6,6 +6,7 @@ import time
 from uuid import uuid1
 from urllib.parse import urljoin
 import aiohttp
+import requests
 
 try:
     import pkg_resources
@@ -31,12 +32,13 @@ class KucoinFuturesBaseRestApiAsync(object):
         # TODO: 该功能未实现
         self.TCP_NODELAY = 0
 
+        self.session: aiohttp.ClientSession | None = None
+
         self.base_url = "https://api-sandbox-futures.kucoin.com" if is_sandbox else "https://api-futures.kucoin.com"
 
     async def _request(self, method, endpoint, params=None):
         url = urljoin(self.base_url, endpoint)
         ts = str(int(time.time() * 1000))
-        # ts = str(int(time.time()) * 1000)
         headers = self._create_headers(method, endpoint, ts, params)
 
         # data_json = ''
@@ -47,13 +49,22 @@ class KucoinFuturesBaseRestApiAsync(object):
         #             strl.append("{}={}".format(key, params[key]))
         #         data_json += '&'.join(strl)
 
-        async with aiohttp.ClientSession() as session:
-            if method in ['GET', 'DELETE']:
-                async with session.request(method, url, headers=headers, params=params) as response:
-                    return await response.json()
-            else:
-                async with session.request(method, url, headers=headers, json=params) as response:
-                    return await response.json()
+        await self._create_session()
+        if method in ['GET', 'DELETE']:
+            async with self.session.request(method, url, headers=headers, params=params) as response:
+                return await response.json()
+        else:
+            async with self.session.request(method, url, headers=headers, json=params) as response:
+                return await response.json()
+
+    async def _create_session(self):
+        if self.session is None or self.session.closed:
+            self.session = aiohttp.ClientSession()
+
+    async def close_session(self):
+        if self.session:
+            await self.session.close()
+            self.session = None
 
     def _create_headers(self, method, endpoint, timestamp, params):
         # Create pre-sign string
@@ -66,7 +77,8 @@ class KucoinFuturesBaseRestApiAsync(object):
 
         # Create signature
         signature = base64.b64encode(
-            hmac.new(self.secret.encode('utf-8'), pre_sign_str.encode('utf-8'), hashlib.sha256).digest()).decode('utf-8')
+            hmac.new(self.secret.encode('utf-8'), pre_sign_str.encode('utf-8'), hashlib.sha256).digest()).decode(
+            'utf-8')
 
         # Create passphrase
         passphrase = base64.b64encode(hmac.new(self.secret.encode('utf-8'), self.passphrase.encode('utf-8'),
