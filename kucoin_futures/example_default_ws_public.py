@@ -19,9 +19,9 @@ async def main():
     ws_client = await KucoinFuturesWsClient.create(None, client, deal_msg, private=False)
 
     await ws_client.subscribe('/contractMarket/level2:XBTUSDM')
-    await ws_client.subscribe('/contractMarket/level3:XBTUSDM')
+    # await ws_client.subscribe('/contractMarket/level3:XBTUSDM')
     while True:
-        await asyncio.sleep(60, loop=loop)
+        await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
