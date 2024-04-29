@@ -60,7 +60,6 @@ class KucoinFuturesBaseRestApiAsync(object):
     async def _create_session(self):
         if self.session is None or self.session.closed:
             self.session = aiohttp.ClientSession()
-            print("创建session")
 
     async def close_session(self):
         if self.session:
