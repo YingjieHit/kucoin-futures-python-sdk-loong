@@ -13,7 +13,6 @@ class Ticker:
     ask_size: float
     ts: int
 
-
 @dataclass
 class Order:
     """订单(返回)字段"""
