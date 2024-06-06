@@ -81,6 +81,7 @@ class BaseMarketMaker(object):
         while True:
             try:
                 event = await self.cancel_order_task_queue.get()
+
                 if event.type == EventType.CANCEL_ALL_ORDER:
                     # 撤销所有订单
                     symbol = event.data
@@ -89,11 +90,8 @@ class BaseMarketMaker(object):
                 elif event.type == EventType.CANCEL_ORDER:
                     # 撤单
                     co: CancelOrder = event.data
-                    print(f"收到cancel order事件，{co}")
                     if co.client_oid:
-                        print("开始撤单，根据client_oid撤单")
                         res = await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
-                        print(f"撤单结果{res}")
                     else:
                         await self.trade.cancel_order(co.order_id)
             except Exception as e:
@@ -164,7 +162,11 @@ class BaseMarketMaker(object):
         await self.cancel_order_task_queue.put(CancelAllOrderEvent(symbol))
 
     async def cancel_order_by_order_id(self, order_id: str):
-        await self.cancel_order_task_queue.put(CancelOrder(order_id=order_id))
+        # await self.cancel_order_task_queue.put(CancelOrder(order_id=order_id))
+        data = CancelOrder(order_id=order_id)
+        await self.cancel_order_task_queue.put(CancelOrderEvent(data))
 
     async def cancel_order_by_client_oid(self, symbol, client_oid):
-        await self.cancel_order_task_queue.put(CancelOrder(symbol=symbol, client_oid=client_oid))
+        # await self.cancel_order_task_queue.put(CancelOrder(symbol=symbol, client_oid=client_oid))
+        data = CancelOrder(symbol=symbol, client_oid=client_oid)
+        await self.cancel_order_task_queue.put(CancelOrderEvent(data))
