@@ -70,5 +70,41 @@ class Utils(object):
 
         return rounded_value
 
+    @staticmethod
+    def calc_decimal_places(number):
+        """
+        获取一个数字的小数点后面位数
+        """
+        # 将数字转换为字符串
+        str_num = str(number)
+        # 检查是否包含小数点
+        if '.' in str_num:
+            # 分割字符串，取小数点后的部分，并计算其长度
+            decimal_part = str_num.split('.')[1]
+            return len(decimal_part)
+        else:
+            # 如果没有小数点，则返回0
+            return 0
+
+    @staticmethod
+    def insure_decimals(number, decimal_places):
+        """
+        保留小数位数
+        """
+        # 将数字转换为字符串
+        str_num = str(number)
+        # 检查是否包含小数点
+        if '.' in str_num:
+            # 分割字符串，取小数点后的部分，并计算其长度
+            decimal_part = str_num.split('.')[1]
+            # 如果小数部分的长度大于需要保留的位数，则截取
+            if len(decimal_part) > decimal_places:
+                return float(str_num[:str_num.index('.') + decimal_places + 1])
+            else:
+                return number
+        else:
+            # 如果没有小数点，则返回0
+            return number
+
 
 utils = Utils()
