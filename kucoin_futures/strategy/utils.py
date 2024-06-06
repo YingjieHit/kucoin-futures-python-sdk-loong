@@ -1,4 +1,5 @@
 
+from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
 from kucoin_futures.strategy.object import Ticker, Order
 
@@ -105,6 +106,10 @@ class Utils(object):
         else:
             # 如果没有小数点，则返回0
             return number
+
+    @staticmethod
+    def create_client_oid():
+        return ''.join([each for each in str(uuid1()).split('-')])
 
 
 utils = Utils()
