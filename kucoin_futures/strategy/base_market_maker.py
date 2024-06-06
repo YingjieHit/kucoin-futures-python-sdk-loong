@@ -89,8 +89,11 @@ class BaseMarketMaker(object):
                 elif event.type == EventType.CANCEL_ORDER:
                     # 撤单
                     co: CancelOrder = event.data
+                    print(f"收到cancel order事件，{co}")
                     if co.client_oid:
-                        await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
+                        print("开始撤单，根据client_oid撤单")
+                        res = await self.trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
+                        print(f"撤单结果{res}")
                     else:
                         await self.trade.cancel_order(co.order_id)
             except Exception as e:

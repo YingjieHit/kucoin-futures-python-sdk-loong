@@ -127,6 +127,7 @@ class TradeDataAsync(KucoinFuturesBaseRestApiAsync):
                 'leverage': lever,
                 'type': 'limit',
                 'postOnly': post_only,
+                'clientOid': client_oid_buy,
             },
             {
                 'symbol': symbol,
@@ -136,6 +137,7 @@ class TradeDataAsync(KucoinFuturesBaseRestApiAsync):
                 'leverage': lever,
                 'type': 'limit',
                 'postOnly': post_only,
+                'clientOid': client_oid_sell,
             }
         ]
         if not client_oid_buy:

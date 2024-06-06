@@ -19,7 +19,7 @@ class Order:
     symbol: str  # "symbol": "XBTUSDM", // 合約symbol
     side: str  # "side": "buy", // 訂單方向，買或賣
     order_id: str  # "orderId": "5cdfc138b21023a909e5ad55", // 訂單號
-    type: str  # "type": "match", // 消息類型，取值列表: "open", "match", "filled", "canceled", "update"
+    type: str  # "type": "match", // 消息類型，取值列表: "open", "match", "filled", "update"  "canceled", "done"  似乎撤单后为done而不是canceled
     fee_type: str  # "feeType": "takerFee", // 費用類型，當type = match才包含此字段，取值列表: "takerFee", "makerFee"
     status: str  # "status": "open", // 訂單狀態: "match", "open", "done"
     match_size: float  # "matchSize": "", //成交數量 (當類型爲"match"時包含此字段)
