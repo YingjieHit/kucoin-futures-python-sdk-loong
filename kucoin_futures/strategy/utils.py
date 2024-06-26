@@ -6,6 +6,22 @@ from kucoin_futures.strategy.object import Ticker, Order
 
 class Utils(object):
 
+    # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
+    @staticmethod
+    def spot_dict_2_ticker(ticker_data: dict) -> Ticker:
+        """
+        将spot的ticker数据的字典转换为Ticker对象，使用字典的get方法来避免KeyError。
+        """
+        return Ticker(
+            symbol=ticker_data.get("symbol"),
+            sequence=ticker_data.get("sequence", 0),  # 提供默认值为0
+            bid_size=float(ticker_data.get("bestBidSize", 0)),  # 默认值0，需要转换为float
+            bid_price=float(ticker_data.get("bestBid", 0)),  # 默认值0，转换为float
+            ask_price=float(ticker_data.get("bestAsk", 0)),  # 默认值0，转换为float
+            ask_size=float(ticker_data.get("bestAskSize", 0)),  # 默认值0，转换为float
+            ts=ticker_data.get("time", 0)  # 提供默认值为0
+        )
+
     @staticmethod
     def dict_2_ticker(ticker_data: dict) -> Ticker:
         """
