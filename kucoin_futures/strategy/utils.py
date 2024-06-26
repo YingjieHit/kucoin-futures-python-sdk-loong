@@ -8,6 +8,22 @@ class Utils(object):
 
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
     @staticmethod
+    def spot_level2_2_ticker(level2_data) -> Ticker:
+        """
+        将spot的level2数据的字典转换为Ticker对象，使用字典的get方法来避免KeyError。
+        """
+        return Ticker(
+            symbol=level2_data.get("symbol"),
+            sequence=level2_data.get("sequence", 0),  # 提供默认值为0
+            bid_size=float(level2_data["bids"][0][1]),  # 需要转换为float
+            bid_price=float(level2_data['bids'][0][0]),  # 转换为float
+            ask_price=float(level2_data['asks'][0][0]),  # 转换为float
+            ask_size=float(level2_data['asks'][0][1]),  # 默认值0，转换为float
+            ts=level2_data.get("ts", 0)  # 提供默认值为0
+        )
+
+    # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
+    @staticmethod
     def spot_dict_2_ticker(ticker_data: dict) -> Ticker:
         """
         将spot的ticker数据的字典转换为Ticker对象，使用字典的get方法来避免KeyError。
