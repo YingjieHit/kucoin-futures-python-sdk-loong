@@ -26,4 +26,8 @@ PRICE_INTERVAL = {
     'KASUSDTM': 0.000001,
     'ONDOUSDTM': 0.0001,
     'FTMUSDTM': 0.0001,
+
+    'BTC-USDT': 0.1,
+    'ETH-USDT': 0.01,
+    'SOL-USDT': 0.001,
 }
