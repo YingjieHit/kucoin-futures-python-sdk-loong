@@ -19,7 +19,7 @@ class Utils(object):
             bid_price=float(level2_data['bids'][0][0]),  # 转换为float
             ask_price=float(level2_data['asks'][0][0]),  # 转换为float
             ask_size=float(level2_data['asks'][0][1]),  # 默认值0，转换为float
-            ts=level2_data.get("ts", 0)  # 提供默认值为0
+            ts=level2_data.get("timestamp", 0)  #
         )
 
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
