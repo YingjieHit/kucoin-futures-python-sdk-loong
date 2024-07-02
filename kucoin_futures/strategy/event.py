@@ -67,7 +67,7 @@ class CancelOrderEvent(Event):
         self.type = EventType.CANCEL_ORDER
 
 
-class AccountBalance(Event):
+class AccountBalanceEvent(Event):
     """账户余额更变"""
     def __init__(self, data: dict):
         super().__init__(data)
