@@ -1,5 +1,4 @@
-
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -12,6 +11,7 @@ class Ticker:
     ask_price: float  # 数据源为str需转化
     ask_size: float
     ts: int
+
 
 @dataclass
 class Order:
@@ -70,3 +70,21 @@ class CancelOrder:
     symbol: str = ''
     client_oid: str = ''
     order_id: str = ''
+
+
+@dataclass
+class AccountBalance:
+    """账户更变字段"""
+    account_id: str = ''
+    available: float = 0
+    available_change: float = 0
+    currency: str = ''
+    hold: float = 0
+    hold_change: float = 0
+    relation_context: dict = field(default_factory=dict)
+    relation_event: str = ''
+    relation_event_id: str = ''
+    ts: int = 0  # 对应time
+    total: float = 0
+
+

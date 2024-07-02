@@ -1,10 +1,29 @@
 
 from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
-from kucoin_futures.strategy.object import Ticker, Order
+from kucoin_futures.strategy.object import Ticker, Order, AccountBalance
 
 
 class Utils(object):
+
+    @staticmethod
+    def spot_dict_2_account_balance(balance_data) -> AccountBalance:
+        """
+        将spot的balance数据的字典转换为AccountBalance对象，使用字典的get方法来避免KeyError。
+        """
+        return AccountBalance(
+            account_id=balance_data.get("accountId"),
+            available=float(balance_data.get("available")),
+            available_change=float(balance_data.get("availableChange")),
+            currency=balance_data.get("currency"),
+            hold=float(balance_data.get("hold")),
+            hold_change=float(balance_data.get("holdChange")),
+            relation_context=balance_data.get("relationContext"),
+            relation_event=balance_data.get("relationEvent"),
+            relation_event_id=balance_data.get("relationEventId"),
+            ts=int(balance_data.get("timestamp")),
+            total=float(balance_data.get("total"))
+        )
 
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
     @staticmethod
