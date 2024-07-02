@@ -21,7 +21,7 @@ class Utils(object):
             relation_context=balance_data.get("relationContext"),
             relation_event=balance_data.get("relationEvent"),
             relation_event_id=balance_data.get("relationEventId"),
-            ts=int(balance_data.get("timestamp")),
+            ts=int(balance_data.get("time")),
             total=float(balance_data.get("total"))
         )
 
