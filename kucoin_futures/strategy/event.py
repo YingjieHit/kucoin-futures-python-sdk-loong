@@ -10,6 +10,7 @@ class EventType:
     CREATE_ORDER = 'CREATE_ORDER'
     CANCEL_ALL_ORDER = 'CANCEL_ALL_ORDER'
     CANCEL_ORDER = 'CANCEL_ORDER'
+    ACCOUNT_BALANCE = 'ACCOUNT_BALANCE'
 
 
 class Event(object):
@@ -64,3 +65,10 @@ class CancelOrderEvent(Event):
     def __init__(self, data: CancelOrder):
         super().__init__(data)
         self.type = EventType.CANCEL_ORDER
+
+
+class AccountBalance(Event):
+    """账户余额更变"""
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.type = EventType.ACCOUNT_BALANCE
