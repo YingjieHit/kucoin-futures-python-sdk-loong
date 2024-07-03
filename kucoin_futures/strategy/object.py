@@ -63,6 +63,7 @@ class CreateOrder:
     type: str
     client_oid: str = ''
     post_only: bool = True
+    cancel_after: float = -1
 
 
 @dataclass
