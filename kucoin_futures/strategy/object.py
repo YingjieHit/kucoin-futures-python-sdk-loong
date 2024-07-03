@@ -49,6 +49,7 @@ class MarketMakerCreateOrder:
     client_oid_buy: str
     client_oid_sell: str
     post_only: bool
+    cancel_after: float
 
 
 @dataclass
@@ -86,5 +87,3 @@ class AccountBalance:
     relation_event_id: str = ''
     ts: int = 0  # 对应time
     total: float = 0
-
-
