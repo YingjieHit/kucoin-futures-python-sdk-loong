@@ -14,6 +14,20 @@ class Ticker:
 
 
 @dataclass
+class Bar:
+    """k线数据字段"""
+    symbol: str
+    ts: int
+    open: float
+    close: float
+    high: float
+    low: float
+    volume: float
+    turnover: float
+
+
+
+@dataclass
 class Order:
     """订单(返回)字段"""
     symbol: str  # "symbol": "XBTUSDM", // 合約symbol
