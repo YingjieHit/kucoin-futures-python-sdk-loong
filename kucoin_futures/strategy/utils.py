@@ -75,6 +75,9 @@ class Utils(object):
                 turnover=float(candle[6]),
             )
             bars.append(bar)
+        # 如果发现ts是从大到小排列，则倒序
+        if bars[0].ts > bars[-1].ts:
+            bars.reverse()
         return bars
 
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
