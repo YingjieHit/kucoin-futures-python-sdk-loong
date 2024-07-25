@@ -1,4 +1,3 @@
-
 from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
 from kucoin_futures.strategy.object import Ticker, Order, AccountBalance, Bar
@@ -58,6 +57,26 @@ class Utils(object):
             turnover=float(candles.get("turnover"))
         )
 
+    @staticmethod
+    def spot_candles_2_bars(symbol: str, candles_data: list) -> list:
+        """
+        将spot的candles数据的数组(由rest接口读取)转换为Bar对象，使用字典的get方法来避免KeyError。
+        """
+        bars = []
+        for candle in candles_data:
+            bar = Bar(
+                symbol=symbol,
+                ts=int(candle[0]),
+                open=float(candle[1]),
+                close=float(candle[2]),
+                high=float(candle[3]),
+                low=float(candle[4]),
+                volume=float(candle[5]),
+                turnover=float(candle[6]),
+            )
+            bars.append(bar)
+        return bars
+
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
     @staticmethod
     def spot_dict_2_ticker(ticker_data: dict) -> Ticker:
@@ -73,7 +92,7 @@ class Utils(object):
             ask_size=float(ticker_data.get("bestAskSize", 0)),  # 默认值0，转换为float
             ts=ticker_data.get("time", 0)  # 提供默认值为0
         )
-    
+
     # TODO: 该方法为现货相关，只是暂时写在这里，后期需考虑合理的现货与合约结合的架构
     @staticmethod
     def spot_dict_2_order(order_data: dict) -> Order:
