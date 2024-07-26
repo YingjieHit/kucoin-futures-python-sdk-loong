@@ -48,13 +48,13 @@ class Utils(object):
         candles = candle_data.get("candles")
         return Bar(
             symbol=candle_data.get("symbol"),
-            ts=int(candles.get("ts")),
-            open=float(candles.get("open")),
-            close=float(candles.get("close")),
-            high=float(candles.get("high")),
-            low=float(candles.get("low")),
-            volume=float(candles.get("volume")),
-            turnover=float(candles.get("turnover"))
+            ts=int(candles[0]),
+            open=float(candles[1]),
+            close=float(candles[2]),
+            high=float(candles[3]),
+            low=float(candles[4]),
+            volume=float(candles[5]),
+            turnover=float(candles[6]),
         )
 
     @staticmethod
