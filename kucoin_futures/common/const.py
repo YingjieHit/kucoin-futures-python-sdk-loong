@@ -31,3 +31,14 @@ PRICE_INTERVAL = {
     'ETH-USDT': 0.01,
     'SOL-USDT': 0.001,
 }
+
+
+# 定义合约的最小数量
+MIN_SIZE = {
+    'BTC-USDT': 0.00000001,
+    'ETH-USDT': None,
+    'SOL-USDT': None
+}
+
+
+
