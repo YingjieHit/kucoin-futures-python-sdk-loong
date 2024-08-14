@@ -198,6 +198,7 @@ class Utils(object):
         获取一个数字的小数点后面位数
         """
         # 将数字转换为字符串
+        number = Decimal(str(number))
         str_num = str(number)
         # 检查是否包含小数点
         if '.' in str_num:
