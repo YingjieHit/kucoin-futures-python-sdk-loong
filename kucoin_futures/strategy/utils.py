@@ -214,6 +214,8 @@ class Utils(object):
         """
         保留小数位数
         """
+        # 四舍五入
+        number = int(number * 10**decimal_places) / 10**decimal_places
         # 将数字转换为字符串
         str_num = str(number)
         # 检查是否包含小数点
