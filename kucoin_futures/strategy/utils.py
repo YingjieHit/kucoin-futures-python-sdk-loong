@@ -1,3 +1,4 @@
+from datetime import datetime, timezone, timedelta
 from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
 from kucoin_futures.strategy.object import Ticker, Order, AccountBalance, Bar
@@ -235,5 +236,17 @@ class Utils(object):
     def create_client_oid():
         return ''.join([each for each in str(uuid1()).split('-')])
 
+    @staticmethod
+    def ts_2_beijing_datetime(ts: int) -> datetime:
+        # 定义北京时间的时区（UTC+8）
+        beijing_timezone = timezone(timedelta(hours=8))
+        # 直接将时间戳转换为北京时间
+        beijing_time = datetime.fromtimestamp(ts, beijing_timezone)
+        return beijing_time
+
+    @staticmethod
+    def ts_2_beijing_hour(ts: int) -> int:
+        beijing_time = Utils.ts_2_beijing_datetime(ts)
+        return beijing_time.hour
 
 utils = Utils()
