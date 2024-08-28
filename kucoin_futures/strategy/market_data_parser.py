@@ -36,20 +36,18 @@ class MarketDataParser(object):
         """
         解析Bar数据
         """
-        # topic = msg.get('topic')
-        # symbol = topic.split(':')[1]
-        # data = msg.get('data')
-        # return Bar(
-        #     symbol=symbol,
-        #     ts=data.get('ts'),
-        #     open=data.get('open'),
-        #     close=data.get('close'),
-        #     high=data.get('high'),
-        #     low=data.get('low'),
-        #     volume=data.get('volume'),
-        #     turnover=data.get('turnover'),
-        # )
-        pass
+        data = msg.get('data')
+        candles = data.get('candles')
+        return Bar(
+            symbol=data.get('symbol'),
+            ts= int(candles[0]),
+            open=float(candles[1]),
+            close=float(candles[2]),
+            high=float(candles[3]),
+            low=float(candles[4]),
+            turnover=float(candles[5]),  # 官方不推荐使用该字段
+            volume=float(candles[6]),
+        )
 
 
 market_data_parser = MarketDataParser()
