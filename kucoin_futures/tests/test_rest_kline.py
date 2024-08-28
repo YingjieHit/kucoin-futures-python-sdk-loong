@@ -6,6 +6,9 @@ def main():
     market = Market()
     end_t = time_utils.get_cur_ts('ms')
     begin_t = end_t - time_utils.calc_seconds_by_freq_count('5min', 210) * 1000
+
+    end_t = time_utils.get_ts_from_str()
+
     print(time_utils.get_ts_unit(begin_t))
     kline_data = market.get_kline_data('XBTUSDTM', 5, begin_t, end_t)
     print(kline_data)

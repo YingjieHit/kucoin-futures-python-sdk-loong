@@ -18,9 +18,9 @@ class TimeUtils(object):
 
     # 输入时间(字符串)，输出时间戳(int)
     @staticmethod
-    def get_ts_from_str(date_str: str, unit='s'):
+    def get_ts_from_str(dt_str: str, unit='s'):
         # date_str的格式为: 2022-01-01 00:00:00
-        dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
         if unit == 's':
             return int(dt.timestamp())
         elif unit == 'ms':
