@@ -30,6 +30,7 @@ class BaseCta(object):
 
 
     async def _create_ws_client(self):
+        print(1)
         # 创建ws_client
         self._ws_public_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_public_msg,
                                                                    private=False)
