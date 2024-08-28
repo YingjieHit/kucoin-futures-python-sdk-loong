@@ -42,8 +42,8 @@ class BaseCta(object):
         raise NotImplementedError("需要实现run")
 
     async def _deal_public_msg(self, msg):
-        # data = msg.get('data')
-        # print(msg)
+        data = msg.get('data')
+        print(msg)
         if msg.get('subject') == Subject.level2:
             level2_depth5 = market_data_parser.parse_level2_depth5(msg)
             await self._event_queue.put(Level2Depth5Event(level2_depth5))
