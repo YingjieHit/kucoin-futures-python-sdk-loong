@@ -28,7 +28,7 @@ class MarketDataParser(object):
             ask_sizes=ask_sizes,
             bid_prices=bid_prices,
             bid_sizes=bid_sizes,
-            ts=msg.get('ts')
+            ts=data.get('ts')
         )
 
 
