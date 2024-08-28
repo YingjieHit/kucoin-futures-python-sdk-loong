@@ -49,6 +49,7 @@ class BaseCta(object):
             await self._event_queue.put(Level2Depth5Event(level2_depth5))
         elif msg.get('subject') == Subject.candleStick:
             bar = market_data_parser.parse_bar(msg)
+            print(bar)
             await self._event_queue.put(BarEvent(bar))
 
     async def _deal_private_msg(self, msg):
