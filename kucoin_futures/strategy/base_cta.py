@@ -35,6 +35,7 @@ class BaseCta(object):
                                                                      private=True)
 
     async def init(self):
+        await asyncio.create_task(self._process_event())
         await self._create_ws_client()
 
     async def run(self):
