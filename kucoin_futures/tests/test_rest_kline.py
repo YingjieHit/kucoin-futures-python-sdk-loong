@@ -6,7 +6,8 @@ def main():
     market = Market()
     begin_t = time_utils.get_cur_timestamp()
     end_t = time_utils.get_cur_timestamp() - time_utils.calc_seconds_by_freq_count('1day', 1)
-    kline_data = market.get_kline_data('XBTUSDTM', 5, )
+    print(time_utils.get_ts_unit(begin_t))
+    kline_data = market.get_kline_data('XBTUSDTM', 5, begin_t, end_t)
     print(kline_data)
     print(len(kline_data))
 
@@ -16,6 +17,7 @@ def main():
     print(datetime.fromtimestamp(ts_0 / 1e3))
     print(datetime.fromtimestamp(ts_last / 1e3))
 
+    print(time_utils.get_ts_unit(begin_t))
 
 if __name__ == '__main__':
     main()

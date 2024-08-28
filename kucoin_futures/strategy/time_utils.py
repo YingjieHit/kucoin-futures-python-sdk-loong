@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime, timedelta
 
 
@@ -6,8 +7,14 @@ class TimeUtils(object):
 
     # 获取当前时间戳 int
     @staticmethod
-    def get_cur_timestamp():
-        return int(datetime.now().timestamp())
+    def get_cur_ts(unit='s'):
+        ts = time.time()
+        if unit == 's':
+            return int(ts)
+        elif unit == 'ms':
+            return int(ts * 1e3)
+        elif unit == 'ns':
+            return int(ts * 1e9)
 
     # 传入频率和数量，返回秒数
     @staticmethod
