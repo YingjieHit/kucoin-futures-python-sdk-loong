@@ -1,3 +1,4 @@
+from datetime import datetime
 from kucoin_futures.client import Market
 from kucoin_futures.strategy.time_utils import time_utils
 
@@ -9,6 +10,11 @@ def main():
     print(kline_data)
     print(len(kline_data))
 
+    ts_0 = kline_data[0][0]
+    ts_last = kline_data[-1][0]
+
+    print(datetime.fromtimestamp(ts_0 / 1e3))
+    print(datetime.fromtimestamp(ts_last / 1e3))
 
 
 if __name__ == '__main__':

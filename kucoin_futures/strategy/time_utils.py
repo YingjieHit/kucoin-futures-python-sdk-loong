@@ -42,5 +42,20 @@ class TimeUtils(object):
         date_str = datetime.utcfromtimestamp(ts_seconds).strftime('%Y-%m-%d')
         return date_str
 
+    # 传入int时间戳，判断时间戳的单位是s ms ns
+    @staticmethod
+    def get_ts_unit(ts: int):
+        # 获取时间戳的位数
+        length = len(str(ts))
+
+        if length == 10:
+            return 's'  # 秒级时间戳
+        elif length == 13:
+            return 'ms'  # 毫秒级时间戳
+        elif length == 19:
+            return 'ns'  # 纳秒级时间戳
+        else:
+            return 'Unknown'  # 无法识别的时间戳格式
+
 
 time_utils = TimeUtils()
