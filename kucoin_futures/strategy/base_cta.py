@@ -26,6 +26,7 @@ class BaseCta(object):
                                url='https://api-futures.kucoin.com')
         self._ws_public_client: KucoinFuturesWsClient | None = None
         self._ws_private_client: KucoinFuturesWsClient | None = None
+        self._process_event_task: asyncio.Task | None = None
 
     async def _create_ws_client(self):
         # 创建ws_client
@@ -35,7 +36,7 @@ class BaseCta(object):
                                                                      private=True)
 
     async def init(self):
-        await asyncio.create_task(self._process_event())
+        self._process_event_task = asyncio.create_task(self._process_event())
         await self._create_ws_client()
 
     async def run(self):
