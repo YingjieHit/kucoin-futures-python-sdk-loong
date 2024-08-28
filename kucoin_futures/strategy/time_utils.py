@@ -16,6 +16,19 @@ class TimeUtils(object):
         elif unit == 'ns':
             return int(ts * 1e9)
 
+    # 输入时间(字符串)，输出时间戳(int)
+    @staticmethod
+    def get_ts_from_str(date_str: str, unit='s'):
+        # date_str的格式为: 2022-01-01 00:00:00
+        dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        if unit == 's':
+            return int(dt.timestamp())
+        elif unit == 'ms':
+            return int(dt.timestamp() * 1e3)
+        elif unit == 'ns':
+            return int(dt.timestamp() * 1e9)
+
+
     # 传入频率和数量，返回秒数
     @staticmethod
     def calc_seconds_by_freq_count(freq: str, n: int):
