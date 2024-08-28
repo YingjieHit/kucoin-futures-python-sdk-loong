@@ -55,8 +55,10 @@ class BaseCta(object):
         data = msg.get('data')
 
     async def _process_event(self):
+        print(11111)
         while True:
             try:
+                print(1)
                 event = await self._event_queue.get()
                 print(event)
                 if event.type == EventType.LEVEL2DEPTH5:
