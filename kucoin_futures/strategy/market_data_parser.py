@@ -31,5 +31,25 @@ class MarketDataParser(object):
             ts=data.get('ts')
         )
 
+    @staticmethod
+    def parse_bar(msg: dict) -> Bar:
+        """
+        解析Bar数据
+        """
+        # topic = msg.get('topic')
+        # symbol = topic.split(':')[1]
+        # data = msg.get('data')
+        # return Bar(
+        #     symbol=symbol,
+        #     ts=data.get('ts'),
+        #     open=data.get('open'),
+        #     close=data.get('close'),
+        #     high=data.get('high'),
+        #     low=data.get('low'),
+        #     volume=data.get('volume'),
+        #     turnover=data.get('turnover'),
+        # )
+        pass
+
 
 market_data_parser = MarketDataParser()
