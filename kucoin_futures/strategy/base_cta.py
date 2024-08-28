@@ -3,6 +3,8 @@ import asyncio
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
+from kucoin_futures.strategy.market_data_parser import market_data_parser
+from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent, Level2Depth5Event)
 
 
 class BaseCta(object):
@@ -20,33 +22,32 @@ class BaseCta(object):
                                secret=secret,
                                passphrase=passphrase,
                                url='https://api-futures.kucoin.com')
-        self._ws_public_client: KucoinFuturesWsClient|None = None
-        self._ws_private_client: KucoinFuturesWsClient|None = None
+        self._ws_public_client: KucoinFuturesWsClient | None = None
+        self._ws_private_client: KucoinFuturesWsClient | None = None
 
     async def _create_ws_client(self):
         # 创建ws_client
         self._ws_public_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_public_msg,
-                                                                   private=False)
+                                                                    private=False)
         self._ws_private_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_private_msg,
-                                                                    private=True)
+                                                                     private=True)
+
     async def init(self):
         await self._create_ws_client()
 
     async def run(self):
         raise NotImplementedError("需要实现run")
 
-
     async def _deal_public_msg(self, msg):
-        data = msg.get('data')
-        print(msg)
-        # if msg.get('subject') == Subject.tickerV2:
-        #     ticker = utils.dict_2_ticker(data)
-        #     await self.event_queue.put(TickerEvent(ticker))
+        # data = msg.get('data')
+        # print(msg)
+        if msg.get('subject') == Subject.level2:
+            level2_depth5 = market_data_parser.parse_level2_depth5(msg)
+            print(level2_depth5)
+            await self._event_queue.put(Level2Depth5Event(level2_depth5))
 
     async def _deal_private_msg(self, msg):
         data = msg.get('data')
-
-
 
     async def _subscribe_kline(self, symbol, kline_frequency):
         # topic举例 '/contractMarket/limitCandle:XBTUSDTM_1hour'
@@ -68,7 +69,3 @@ class BaseCta(object):
 
     async def _unsubscribe_trade_orders(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contractMarket/tradeOrders:{symbol}')
-
-
-
-

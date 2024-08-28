@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
-from kucoin_futures.strategy.object import Ticker, Order, AccountBalance, Bar
+from kucoin_futures.strategy.object import (Ticker, Order, AccountBalance, Bar, Level2Depth5)
 
 
 class Utils(object):

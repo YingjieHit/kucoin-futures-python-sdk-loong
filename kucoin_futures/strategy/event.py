@@ -1,10 +1,11 @@
-
-from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar
+from kucoin_futures.strategy.object import (Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar,
+                                            Level2Depth5)
 
 
 class EventType:
     """事件类型"""
     TICKER = 'TICKER'
+    LEVEL2DEPTH5 = 'LEVEL2DEPTH5'
     TRADE_ORDER = 'TRADE_ORDER'
     CREATE_MARKET_MAKER_ORDER = 'CREATE_MARKET_MAKER_ORDER'
     CREATE_ORDER = 'CREATE_ORDER'
@@ -12,6 +13,7 @@ class EventType:
     CANCEL_ORDER = 'CANCEL_ORDER'
     ACCOUNT_BALANCE = 'ACCOUNT_BALANCE'
     BAR = 'BAR'
+
 
 class Event(object):
     def __init__(self, data):
@@ -25,6 +27,15 @@ class TickerEvent(Event):
     def __init__(self, data: Ticker):
         super().__init__(data)
         self.type = EventType.TICKER
+
+
+class Level2Depth5Event(Event):
+    """市场Level2Depth5数据事件"""
+
+    def __init__(self, data: Level2Depth5):
+        super().__init__(data)
+        self.type = EventType.LEVEL2DEPTH5
+
 
 class BarEvent(Event):
     """市场bar数据事件"""
@@ -76,6 +87,7 @@ class CancelOrderEvent(Event):
 
 class AccountBalanceEvent(Event):
     """账户余额更变"""
+
     def __init__(self, data: dict):
         super().__init__(data)
         self.type = EventType.ACCOUNT_BALANCE
