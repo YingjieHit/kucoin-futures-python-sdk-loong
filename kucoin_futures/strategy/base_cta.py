@@ -22,8 +22,10 @@ class BaseCta(object):
                                url='https://api-futures.kucoin.com')
         self._ws_public_client: KucoinFuturesWsClient|None = None
         self._ws_private_client: KucoinFuturesWsClient|None = None
+        self._ws_enable = False
         asyncio.create_task(self._create_ws_client())
-
+        while not self._ws_enable:
+            pass
 
 
 
@@ -33,6 +35,7 @@ class BaseCta(object):
                                                                    private=False)
         self._ws_private_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_private_msg,
                                                                     private=True)
+        self._ws_enable = True
 
     async def run(self):
         raise NotImplementedError("需要实现run")
