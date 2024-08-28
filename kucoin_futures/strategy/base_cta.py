@@ -4,7 +4,9 @@ from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
 from kucoin_futures.strategy.market_data_parser import market_data_parser
-from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent, Level2Depth5Event)
+from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
+                                           Level2Depth5Event, BarEvent)
+from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseCta(object):
@@ -39,16 +41,42 @@ class BaseCta(object):
         raise NotImplementedError("需要实现run")
 
     async def _deal_public_msg(self, msg):
-        data = msg.get('data')
-        print(msg)
+        # data = msg.get('data')
+        # print(msg)
         if msg.get('subject') == Subject.level2:
             level2_depth5 = market_data_parser.parse_level2_depth5(msg)
             await self._event_queue.put(Level2Depth5Event(level2_depth5))
-        # elif msg.get('subject') == Subject.candleStick:
-        #     bar = market_data_parser.parse_bar(msg)
+        elif msg.get('subject') == Subject.candleStick:
+            bar = market_data_parser.parse_bar(msg)
+            await self._event_queue.put(BarEvent(bar))
 
     async def _deal_private_msg(self, msg):
         data = msg.get('data')
+
+    async def _process_event(self):
+        while True:
+            try:
+                event = await self._event_queue.get()
+                if event.type == EventType.LEVEL2DEPTH5:
+                    # 处理ticker
+                    await self.on_level2_depth5(event.data)
+                elif event.type == EventType.BAR:
+                    # 处理k线
+                    await self.on_bar(event.data)
+                elif event.type == EventType.TRADE_ORDER:
+                    # 处理order回报
+                    await self.on_order(event.data)
+            except Exception as e:
+                await app_logger.error(f"process_event Error {str(e)}")
+
+    async def on_level2_depth5(self, level2_depth5):
+        raise NotImplementedError("需要实现on_level2_depth5")
+
+    async def on_bar(self, bar):
+        raise NotImplementedError("需要实现on_bar")
+
+    async def on_order(self, order):
+        raise NotImplementedError("需要实现on_order")
 
     async def _subscribe_kline(self, symbol, kline_frequency):
         # topic举例 '/contractMarket/limitCandle:XBTUSDTM_1hour'
