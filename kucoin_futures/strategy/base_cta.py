@@ -43,26 +43,35 @@ class BaseCta(object):
         raise NotImplementedError("需要实现run")
 
     async def _deal_public_msg(self, msg):
-        data = msg.get('data')
-        print(msg)
-        if msg.get('subject') == Subject.level2:
-            level2_depth5 = market_data_parser.parse_level2_depth5(msg)
-            await self._event_queue.put(Level2Depth5Event(level2_depth5))
-        elif msg.get('subject') == Subject.candleStick:
-            bar = market_data_parser.parse_bar(msg)
-            print(bar)
-            await self._event_queue.put(BarEvent(bar))
+        # data = msg.get('data')
+        # print(msg)
+        try:
+            if msg.get('subject') == Subject.level2:
+                level2_depth5 = market_data_parser.parse_level2_depth5(msg)
+                await self._event_queue.put(Level2Depth5Event(level2_depth5))
+            elif msg.get('subject') == Subject.candleStick:
+                bar = market_data_parser.parse_bar(msg)
+                await self._event_queue.put(BarEvent(bar))
+            else:
+                raise Exception(f"未知的subject {msg.get('subject')}")
+        except Exception as e:
+            await app_logger.error(f"deal_public_msg Error {str(e)}")
 
     async def _deal_private_msg(self, msg):
         data = msg.get('data')
+        print("_deal_private_msg")
+        print(msg)
+        try:
+            if msg.get('subject') == Subject.symbolOrderChange:
+                order = market_data_parser.parse_order(msg)
+                await self._event_queue.put(TraderOrderEvent(order))
+        except Exception as e:
+            await app_logger.error(f"deal_private_msg Error {str(e)}")
 
     async def _process_event(self):
-        print(11111)
         while True:
             try:
-                print(1)
                 event = await self._event_queue.get()
-                print(event)
                 if event.type == EventType.LEVEL2DEPTH5:
                     # 处理ticker
                     await self.on_level2_depth5(event.data)
