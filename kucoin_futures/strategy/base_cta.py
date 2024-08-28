@@ -58,6 +58,7 @@ class BaseCta(object):
         while True:
             try:
                 event = await self._event_queue.get()
+                print(event)
                 if event.type == EventType.LEVEL2DEPTH5:
                     # 处理ticker
                     await self.on_level2_depth5(event.data)
