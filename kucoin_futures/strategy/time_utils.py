@@ -28,6 +28,28 @@ class TimeUtils(object):
         elif unit == 'ns':
             return int(dt.timestamp() * 1e9)
 
+    @staticmethod
+    def get_granularity_by_freq(freq: str):
+        # 返回1代表1分钟
+        # 1min, 5min, 15min, 30min, 1hour, 2hour, 4hour, 8hour, 12hour, 1day, 1week
+        if freq not in ['1min', '5min', '15min', '30min', '1hour', '2hour', '4hour', '8hour', '12hour', '1day',
+                        '1week']:
+            raise ValueError(
+                "freq not in ['1min', '5min', '15min', '30min', '1hour', '2hour', '4hour', '8hour', '12hour', '1day', '1week']")
+
+        return {
+            '1min': 1,
+            '5min': 5,
+            '15min': 15,
+            '30min': 30,
+            '1hour': 60,
+            '2hour': 120,
+            '4hour': 240,
+            '8hour': 480,
+            '12hour': 720,
+            '1day': 1440,
+            '1week': 10080
+        }[freq]
 
     # 传入频率和数量，返回秒数
     @staticmethod
