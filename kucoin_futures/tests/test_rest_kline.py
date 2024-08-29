@@ -1,7 +1,7 @@
 from datetime import datetime
 from kucoin_futures.client import Market
 from kucoin_futures.strategy.time_utils import time_utils
-from kucoin_futures.strategy.kline_data_loader import
+from kucoin_futures.strategy.kline_data_loader import kline_data_loader
 
 def main():
     market = Market()
@@ -29,8 +29,10 @@ def main():
 
 
 def main2():
+    ts = time_utils.get_cur_ts('ms')
+    bars = kline_data_loader.get_last_n_bars('XBTUSDTM', '5min', ts, 10)
 
-
+    print(bars)
 
 if __name__ == '__main__':
     main()

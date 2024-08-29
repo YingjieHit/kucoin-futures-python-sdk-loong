@@ -47,3 +47,4 @@ class KlineDataLoader(object):
 
 
 kline_data_loader = KlineDataLoader()
+
