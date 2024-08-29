@@ -1,6 +1,7 @@
 from datetime import datetime
 from kucoin_futures.client import Market
 from kucoin_futures.strategy.time_utils import time_utils
+from kucoin_futures.strategy.kline_data_loader import
 
 def main():
     market = Market()
@@ -25,6 +26,11 @@ def main():
     print(datetime.fromtimestamp(ts_last / 1e3))
 
     print(time_utils.get_ts_unit(begin_t))
+
+
+def main2():
+
+
 
 if __name__ == '__main__':
     main()

@@ -44,3 +44,6 @@ class KlineDataLoader(object):
             )
 
         return bars
+
+
+kline_data_loader = KlineDataLoader()
