@@ -10,13 +10,11 @@ from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseCta(object):
-    def __init__(self, symbol, key, secret, passphrase, kline_frequency, kline_size):
+    def __init__(self, symbol, key, secret, passphrase):
         self._symbol = symbol
         self._key = key
         self._secret = secret
         self._passphrase = passphrase
-        self._kline_frequency = kline_frequency  # K线周期,1min 5min 15min 30min 1h 2h 4h 1d
-        self._kline_size = kline_size
 
         self._event_queue = asyncio.Queue()
 
@@ -38,6 +36,7 @@ class BaseCta(object):
     async def init(self):
         self._process_event_task = asyncio.create_task(self._process_event())
         await self._create_ws_client()
+
 
     async def run(self):
         raise NotImplementedError("需要实现run")

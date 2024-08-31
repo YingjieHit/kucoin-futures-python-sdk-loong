@@ -30,10 +30,12 @@ def main():
 
 def main2():
     ts = time_utils.get_cur_ts('ms')
-    bars = kline_data_loader.get_last_n_bars('XBTUSDTM', '5min', ts, 10)
-
-    print(bars)
+    bars = kline_data_loader.get_last_n_bars('XBTUSDTM', '5min', ts, 210)
+    print(time_utils.get_ts_unit(bars[0].ts))
+    for i, bar in enumerate(bars):
+        if i >= 198:
+            print(i+1, datetime.fromtimestamp(bar.ts))
 
 if __name__ == '__main__':
-    main()
+    main2()
 
