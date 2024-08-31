@@ -23,6 +23,7 @@ class Level2Depth5:
     bid_sizes: list
     ts: int
 
+
 @dataclass
 class Bar:
     """k线数据字段"""
@@ -34,7 +35,6 @@ class Bar:
     low: float
     volume: float
     turnover: float
-
 
 
 @dataclass
