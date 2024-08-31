@@ -12,6 +12,7 @@ class Ticker:
     ask_size: float
     ts: int
 
+
 @dataclass
 class Level2Depth5:
     """Level2Depth5数据字段"""
