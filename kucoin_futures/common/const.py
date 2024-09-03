@@ -40,5 +40,26 @@ MIN_SIZE = {
     'SOL-USDT': 0.01,
 }
 
+# 定义kc和bn之间的合约转化,指的是订阅到的合约
+BN_TO_KC_SYMBOL = {
+    'BTCUSD_PERP': 'BTCUSDM',
+    'ETHUSD_PERP': 'ETHUSDM',
 
+}
 
+# 定义kc和bn之间的合约转化,指的是订阅到的合约
+KC_TO_BN_SYMBOL = {
+    'BTCUSDM': 'BTCUSD_PERP',
+    'ETHUSDM': 'ETHUSD_PERP',
+}
+
+# 定义kc和bn之间的周期转化
+KC_TO_BN_FREQUENCY = {
+    '1min': '1m',
+    '5min': '5m',
+    '15min': '15m',
+    '30min': '30m',
+    '1hour': '1h',
+    '4hour': '4h',
+    '1day': '1d',
+}

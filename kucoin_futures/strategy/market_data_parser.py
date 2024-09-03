@@ -1,4 +1,5 @@
 from kucoin_futures.strategy.object import (Ticker, Order, AccountBalance, Bar, Level2Depth5)
+from kucoin_futures.common.const import BN_TO_KC_SYMBOL
 
 
 class MarketDataParser(object):
@@ -47,6 +48,23 @@ class MarketDataParser(object):
             low=float(candles[4]),
             turnover=float(candles[5]),  # 官方不推荐使用该字段
             volume=int(candles[6]),
+        )
+
+    @staticmethod
+    def parse_bn_bar(msg: dict) -> Bar:
+        """
+        解析bn Bar数据
+        """
+        k = msg.get('k')
+        return Bar(
+            symbol=BN_TO_KC_SYMBOL.get(msg.get('s')),
+            ts=k.get('t')//1e3,
+            open=float(k.get('o')),
+            close=float(k.get('c')),
+            high=float(k.get('h')),
+            low=float(k.get('l')),
+            turnover=float(k.get('q')),  # 官方不推荐使用该字段
+            volume=int(k.get('v')),
         )
 
     @staticmethod
