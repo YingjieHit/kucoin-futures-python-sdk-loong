@@ -25,7 +25,6 @@ class KlineDataLoader(object):
             if len(sub_kline_data) == 0:
                 break
             kline_data.extend(sub_kline_data)
-            print(sub_kline_data[-1])
             start_ts = sub_kline_data[-1][0] + 1000
 
         kline_data = kline_data[-n:]
