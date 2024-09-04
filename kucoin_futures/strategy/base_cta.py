@@ -70,9 +70,9 @@ class BaseCta(object):
             await app_logger.error(f"deal_public_msg Error {str(e)}")
 
     async def _deal_private_msg(self, msg):
-        data = msg.get('data')
-        print("_deal_private_msg")
-        print(msg)
+        # data = msg.get('data')
+        # print("_deal_private_msg")
+        # print(msg)
         try:
             if msg.get('subject') == Subject.symbolOrderChange:
                 order = market_data_parser.parse_order(msg)
@@ -169,6 +169,12 @@ class BaseCta(object):
 
     async def _unsubscribe_trade_orders(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contractMarket/tradeOrders:{symbol}')
+
+    async def _subscribe_position(self, symbol):
+        await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
+
+    async def _unsubscribe_position(self, symbol):
+        await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
 
     async def _create_order(self, symbol, side, size, type, price, lever, client_oid='', post_only=True):
         co = CreateOrder(
