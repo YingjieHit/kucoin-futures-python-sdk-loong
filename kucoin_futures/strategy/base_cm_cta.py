@@ -19,7 +19,6 @@ class BaseCmCta(BaseCta):
 
     async def _deal_public_msg(self, msg: dict):
         print(msg)
-        print(msg.get('e'))
         try:
             if 'subject' in msg:
                 subject = msg.get('subject')
