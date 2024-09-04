@@ -32,7 +32,7 @@ class BaseCmCta(BaseCta):
                     bar = market_data_parser.parse_bar(msg)
                     await self._event_queue.put(BarEvent(bar))
                 else:
-                    raise Exception(f"未知的subject {subject}")
+                    print(f"未知的subject {subject}")
             # BN接口
             elif 'e' in msg:
                 e = msg.get('e')
@@ -40,9 +40,9 @@ class BaseCmCta(BaseCta):
                     bar = market_data_parser.parse_bn_bar(msg)
                     await self._event_queue.put(BarEvent(bar))
                 else:
-                    raise Exception(f"未知的e {e}")
+                    print(f"未知的e {e}")
             else:
-                raise Exception(f"未知的msg {msg}")
+                print(f"未知的msg {msg}")
         except Exception as e:
             print(f"deal_public_msg Error {str(e)}")
             await app_logger.error(f"deal_public_msg Error {str(e)}")
