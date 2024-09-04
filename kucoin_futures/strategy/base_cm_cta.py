@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from binance.websocket.cm_futures.async_websocket_client import AsyncCMFuturesWebsocketClient
 from kucoin_futures.client import WsToken
@@ -17,10 +18,11 @@ class BaseCmCta(BaseCta):
         super().__init__(symbol, key, secret, passphrase)
         self._bn_client = AsyncCMFuturesWebsocketClient(on_message=self._deal_public_msg)
 
-    async def _deal_public_msg(self, msg: dict):
-        print(msg)
-        print(type(msg))
+    async def _deal_public_msg(self, msg: dict|str):
         try:
+            if isinstance(msg, str):
+                msg = json.loads(msg)
+
             if 'subject' in msg:
                 subject = msg.get('subject')
                 if subject == Subject.level2:
