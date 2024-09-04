@@ -43,6 +43,7 @@ class BaseCmCta(BaseCta):
             else:
                 raise Exception(f"未知的msg {msg}")
         except Exception as e:
+            print(f"deal_public_msg Error {str(e)}")
             await app_logger.error(f"deal_public_msg Error {str(e)}")
 
     async def init(self):
