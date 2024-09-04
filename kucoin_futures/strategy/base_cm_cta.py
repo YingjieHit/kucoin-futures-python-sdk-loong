@@ -17,21 +17,29 @@ class BaseCmCta(BaseCta):
         super().__init__(symbol, key, secret, passphrase)
         self._bn_client = AsyncCMFuturesWebsocketClient(on_message=self._deal_public_msg)
 
-    async def _deal_public_msg(self, msg):
+    async def _deal_public_msg(self, msg: dict):
         print(msg)
         print(msg.get('e'))
         try:
-            if msg.get('subject') == Subject.level2:
-                level2_depth5 = market_data_parser.parse_level2_depth5(msg)
-                await self._event_queue.put(Level2Depth5Event(level2_depth5))
-            elif msg.get('subject') == Subject.candleStick:
-                bar = market_data_parser.parse_bar(msg)
-                await self._event_queue.put(BarEvent(bar))
-            elif msg.get('e') == 'kline':
-                print(11111)
-                bar = market_data_parser.parse_bn_bar(msg)
-                print(bar)
-                await self._event_queue.put(BarEvent(bar))
+            if 'subject' in msg:
+                subject = msg.get('subject')
+                if subject == Subject.level2:
+                    level2_depth5 = market_data_parser.parse_level2_depth5(msg)
+                    await self._event_queue.put(Level2Depth5Event(level2_depth5))
+                elif subject == Subject.candleStick:
+                    bar = market_data_parser.parse_bar(msg)
+                    await self._event_queue.put(BarEvent(bar))
+                else:
+                    raise Exception(f"未知的subject {subject}")
+            elif 'e' in msg:
+                e = msg.get('e')
+                if e == 'kline':
+                    print(11111)
+                    bar = market_data_parser.parse_bn_bar(msg)
+                    print(bar)
+                    await self._event_queue.put(BarEvent(bar))
+                else:
+                    raise Exception(f"未知的e {e}")
             else:
                 raise Exception(f"未知的msg {msg}")
         except Exception as e:
