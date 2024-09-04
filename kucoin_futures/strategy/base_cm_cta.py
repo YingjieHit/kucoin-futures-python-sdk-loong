@@ -19,6 +19,7 @@ class BaseCmCta(BaseCta):
 
     async def _deal_public_msg(self, msg):
         print(msg)
+        print(msg.get('e'))
         try:
             if msg.get('subject') == Subject.level2:
                 level2_depth5 = market_data_parser.parse_level2_depth5(msg)
