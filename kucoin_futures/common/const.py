@@ -42,14 +42,14 @@ MIN_SIZE = {
 
 # 定义kc和bn之间的合约转化,指的是订阅到的合约
 BN_TO_KC_SYMBOL = {
-    'BTCUSD_PERP': 'BTCUSDM',
+    'BTCUSD_PERP': 'XBTUSDM',
     'ETHUSD_PERP': 'ETHUSDM',
 
 }
 
 # 定义kc和bn之间的合约转化,指的是订阅到的合约
 KC_TO_BN_SYMBOL = {
-    'BTCUSDM': 'BTCUSD_PERP',
+    'XBTUSDM': 'BTCUSD_PERP',
     'ETHUSDM': 'ETHUSD_PERP',
 }
 
