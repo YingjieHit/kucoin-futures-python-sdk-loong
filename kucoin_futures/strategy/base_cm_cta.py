@@ -18,6 +18,7 @@ class BaseCmCta(BaseCta):
         self._bn_client = AsyncCMFuturesWebsocketClient(on_message=self._deal_public_msg)
 
     async def _deal_public_msg(self, msg):
+        print(msg)
         try:
             if msg.get('subject') == Subject.level2:
                 level2_depth5 = market_data_parser.parse_level2_depth5(msg)
