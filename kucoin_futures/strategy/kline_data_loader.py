@@ -49,8 +49,6 @@ class KlineDataLoader(object):
         return bars
 
     def get_bn_cm_last_n_bars(self, symbol: str, freq: str, ts: int, n: int) -> list[Bar]:
-        symbol = KC_TO_BN_SYMBOL[symbol]
-        freq = KC_TO_BN_FREQUENCY[freq]
         # 接口ts要求是毫秒
         if time_utils.get_ts_unit(ts) == 's':
             ts = ts * 1000
@@ -61,6 +59,8 @@ class KlineDataLoader(object):
         max_ts = time_utils.calc_seconds_by_freq_count(freq, 1499) * 1000
         end_ts = ts if start_ts + max_ts >= ts else start_ts + max_ts
 
+        symbol = KC_TO_BN_SYMBOL[symbol]
+        freq = KC_TO_BN_FREQUENCY[freq]
         kline_data = []
         while len(kline_data) < n:
             sub_kline_data = self.bn_cm_futures.klines(
