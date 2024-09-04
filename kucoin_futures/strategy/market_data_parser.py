@@ -58,7 +58,7 @@ class MarketDataParser(object):
         k = msg.get('k')
         return Bar(
             symbol=BN_TO_KC_SYMBOL.get(msg.get('s')),
-            ts=k.get('t')//1e3,
+            ts=int(k.get('t')//1e3),
             open=float(k.get('o')),
             close=float(k.get('c')),
             high=float(k.get('h')),

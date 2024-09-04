@@ -22,7 +22,7 @@ class BaseCmCta(BaseCta):
         try:
             if isinstance(msg, str):
                 msg = json.loads(msg)
-
+            # KC接口
             if 'subject' in msg:
                 subject = msg.get('subject')
                 if subject == Subject.level2:
@@ -33,12 +33,11 @@ class BaseCmCta(BaseCta):
                     await self._event_queue.put(BarEvent(bar))
                 else:
                     raise Exception(f"未知的subject {subject}")
+            # BN接口
             elif 'e' in msg:
                 e = msg.get('e')
                 if e == 'kline':
-                    print(11111)
                     bar = market_data_parser.parse_bn_bar(msg)
-                    print(bar)
                     await self._event_queue.put(BarEvent(bar))
                 else:
                     raise Exception(f"未知的e {e}")
