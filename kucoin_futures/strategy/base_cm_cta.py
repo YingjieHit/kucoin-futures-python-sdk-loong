@@ -27,6 +27,7 @@ class BaseCmCta(BaseCta):
                 bar = market_data_parser.parse_bar(msg)
                 await self._event_queue.put(BarEvent(bar))
             elif msg.get('e') == 'kline':
+                print(11111)
                 bar = market_data_parser.parse_bn_bar(msg)
                 print(bar)
                 await self._event_queue.put(BarEvent(bar))
