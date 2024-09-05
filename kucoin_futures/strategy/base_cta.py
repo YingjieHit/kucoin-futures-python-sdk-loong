@@ -187,7 +187,10 @@ class BaseCta(object):
     async def _unsubscribe_position(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
 
-    async def _create_order(self, symbol, side, size, type, price, lever, client_oid='', post_only=True):
+    async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=True):
+        if type != 'market' and price is None:
+            raise ValueError("price can not be None when type is not 'market'")
+
         co = CreateOrder(
             symbol=symbol,
             lever=lever,
