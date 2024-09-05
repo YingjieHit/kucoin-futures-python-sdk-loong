@@ -77,8 +77,10 @@ class BaseCta(object):
             if msg.get('subject') == Subject.symbolOrderChange:
                 order = market_data_parser.parse_order(msg)
                 await self._event_queue.put(TraderOrderEvent(order))
+            else:
+                print(f"_deal_private_msg 未知的subject: {msg.get('subject')}")
         except Exception as e:
-            await app_logger.error(f"deal_private_msg Error {str(e)}")
+            await app_logger.error(f"_deal_private_msg Error {str(e)}")
 
     async def _process_event(self):
         while True:
