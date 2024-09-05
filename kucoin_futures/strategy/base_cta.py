@@ -5,7 +5,8 @@ from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
 from kucoin_futures.strategy.market_data_parser import market_data_parser
 from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           Level2Depth5Event, BarEvent, CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
+                                           Level2Depth5Event, BarEvent, PositionChangeEvent,
+                                           CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
 from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder
 from kucoin_futures.trade.async_trade import TradeDataAsync
 from kucoin_futures.common.app_logger import app_logger
@@ -78,7 +79,7 @@ class BaseCta(object):
                 order = market_data_parser.parse_order(msg)
                 await self._event_queue.put(TraderOrderEvent(order))
             elif msg.get('subject') == Subject.positionChange:
-                print(f"positionChange: {msg}")
+                await self._event_queue.put(PositionChangeEvent(msg.get('data')))
             else:
                 print(f"_deal_private_msg 未知的subject: {msg.get('subject')}")
         except Exception as e:
@@ -97,6 +98,9 @@ class BaseCta(object):
                 elif event.type == EventType.TRADE_ORDER:
                     # 处理order回报
                     await self.on_order(event.data)
+                elif event.type == EventType.POSITION_CHANGE:
+                    # 处理持仓变化
+                    await self.on_position_change(event.data)
             except Exception as e:
                 await app_logger.error(f"process_event Error {str(e)}")
 
@@ -152,6 +156,9 @@ class BaseCta(object):
 
     async def on_order(self, order):
         raise NotImplementedError("需要实现on_order")
+
+    async def on_position_change(self, position_change):
+        raise NotImplementedError("需要实现on_position_change")
 
     async def _subscribe_kline(self, symbol, kline_frequency):
         # topic举例 '/contractMarket/limitCandle:XBTUSDTM_1hour'

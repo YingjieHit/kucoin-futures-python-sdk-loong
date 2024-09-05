@@ -12,6 +12,7 @@ class EventType:
     CANCEL_ALL_ORDER = 'CANCEL_ALL_ORDER'
     CANCEL_ORDER = 'CANCEL_ORDER'
     ACCOUNT_BALANCE = 'ACCOUNT_BALANCE'
+    POSITION_CHANGE = 'POSITION_CHANGE'
     BAR = 'BAR'
 
 
@@ -91,3 +92,10 @@ class AccountBalanceEvent(Event):
     def __init__(self, data: dict):
         super().__init__(data)
         self.type = EventType.ACCOUNT_BALANCE
+
+class PositionChangeEvent(Event):
+    """持仓变化事件"""
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.type = EventType.POSITION_CHANGE
+
