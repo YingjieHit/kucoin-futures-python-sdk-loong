@@ -122,10 +122,7 @@ class BaseCta(object):
                                                              co.client_oid,
                                                              postOnly=co.post_only)
                     elif co.type == 'market':
-                        print("执行市价单")
-                        print(f"symbol: {co.symbol}, side: {co.side}, size: {co.size}, client_oid: {co.client_oid}")
-                        await self._trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
-                                                              postOnly=co.post_only)
+                        await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
             except Exception as e:
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
