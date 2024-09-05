@@ -108,6 +108,7 @@ class BaseCta(object):
         while True:
             try:
                 event = await self._order_task_queue.get()
+                print(f"执行订单事件 {event}")
                 if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
                     # 发送做市单
                     mmo: MarketMakerCreateOrder = event.data
