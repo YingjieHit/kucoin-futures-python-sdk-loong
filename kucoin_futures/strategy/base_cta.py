@@ -51,7 +51,6 @@ class BaseCta(object):
         # 创建ws_client
         await self._create_ws_client()
 
-
     async def run(self):
         raise NotImplementedError("需要实现run")
 
@@ -108,24 +107,25 @@ class BaseCta(object):
         while True:
             try:
                 event = await self._order_task_queue.get()
-                print(f"执行订单事件 {event}")
                 if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
                     # 发送做市单
                     mmo: MarketMakerCreateOrder = event.data
                     res = await self._trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
-                                                                     mmo.price_sell, mmo.client_oid_buy,
-                                                                     mmo.client_oid_sell, mmo.post_only)
+                                                                      mmo.price_sell, mmo.client_oid_buy,
+                                                                      mmo.client_oid_sell, mmo.post_only)
                     # await app_logger.info_logger(f"订单执行结果{res}")
                 elif event.type == EventType.CREATE_ORDER:
                     # 发送订单
                     co: CreateOrder = event.data
                     if co.type == 'limit':
                         await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
-                                                            co.client_oid,
-                                                            postOnly=co.post_only)
+                                                             co.client_oid,
+                                                             postOnly=co.post_only)
                     elif co.type == 'market':
-                        await  self._trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
-                                                                  postOnly=co.post_only)
+                        print("执行市价单")
+                        print(f"symbol: {co.symbol}, side: {co.side}, size: {co.size}, client_oid: {co.client_oid}")
+                        await self._trade.create_market_order(co.symbol, co.side, co.lever, co.client_oid,
+                                                              postOnly=co.post_only)
             except Exception as e:
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
