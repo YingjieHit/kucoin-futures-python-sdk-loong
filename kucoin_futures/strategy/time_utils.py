@@ -99,5 +99,10 @@ class TimeUtils(object):
         else:
             return 'Unknown'  # 无法识别的时间戳格式
 
+    # 获取当前日期对应的字符串
+    @staticmethod
+    def get_date_str():
+        return datetime.now().strftime('%Y-%m-%d')
+
 
 time_utils = TimeUtils()
