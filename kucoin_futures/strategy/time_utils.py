@@ -84,6 +84,21 @@ class TimeUtils(object):
         date_str = datetime.utcfromtimestamp(ts_seconds).strftime('%Y-%m-%d')
         return date_str
 
+    # 兼容s,ms,ns
+    @staticmethod
+    def get_date_str_from_ts(ts: int):
+        ts_unit = TimeUtils.get_ts_unit(ts)
+        if ts_unit == 's':
+            ts_seconds = ts
+        elif ts_unit == 'ms':
+            ts_seconds = ts / 1e3
+        elif ts_unit == 'ns':
+            ts_seconds = ts / 1e9
+        else:
+            raise ValueError("ts_unit not in ['s', 'ms', 'ns']")
+        date_str = datetime.utcfromtimestamp(ts_seconds).strftime('%Y-%m-%d')
+        return date_str
+
     # 传入int时间戳，判断时间戳的单位是s ms ns
     @staticmethod
     def get_ts_unit(ts: int):
@@ -101,7 +116,7 @@ class TimeUtils(object):
 
     # 获取当前日期对应的字符串
     @staticmethod
-    def get_date_str():
+    def get_cur_date_str():
         return datetime.now().strftime('%Y-%m-%d')
 
 
