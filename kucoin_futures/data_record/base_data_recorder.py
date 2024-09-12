@@ -92,10 +92,6 @@ class BaseDataRecorder(object):
     def _flush_file_name(self):
         raise NotImplementedError("需要实现_flush_file_name")
 
-    @property
-    def _header(self):
-        raise NotImplementedError("需要实现_header")
-
     # 订阅数据
     async def _subscribe_data(self):
         raise NotImplementedError("需要实现_subscribe_data")
@@ -103,3 +99,7 @@ class BaseDataRecorder(object):
     async def _normalize_data(self, msg, local_ts) -> dict:
         # 必须含有data[]和ts字段
         raise NotImplementedError("需要实现_normalize_data")
+
+    @property
+    def _header(self):
+        raise NotImplementedError("需要实现_header")
