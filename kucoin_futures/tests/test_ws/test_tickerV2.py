@@ -1,9 +1,7 @@
-
 import asyncio
 import socket
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
-
 
 
 async def main():
@@ -15,7 +13,7 @@ async def main():
     client = WsToken()
     ws_client = await KucoinFuturesWsClient.create(None, client, deal_msg, private=False)
 
-    await ws_client.subscribe(f"/contractMarket/level2Depth5:{symbol}")
+    await ws_client.subscribe(f"/contractMarket/tickerV2:{symbol}")
     while True:
         await asyncio.sleep(60)
 
