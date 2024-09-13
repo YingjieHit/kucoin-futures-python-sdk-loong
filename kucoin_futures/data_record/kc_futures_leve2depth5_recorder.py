@@ -18,7 +18,7 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
         self._ws_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_msg, private=False)
         await self._ws_client.subscribe(f"/contractMarket/level2Depth5:{self._symbol}")
 
-    async def _normalize_data(self, msg, local_ts) -> dict:
+    def _normalize_data(self, msg, local_ts) -> dict:
         # 返回必须含有data[]和ts字段
         data = msg.get('data')
         bids = data.get('bids')
@@ -46,7 +46,7 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
 async def main():
     recorder = KcFuturesLevel2Depth5Recorder(
         symbol="XBTUSDTM",
-        file_dir="/home/ec2-user/HFT_data/KucoinFuture",
+        file_dir="/home/ec2-user/HFT_data/KucoinFuture/level2Depth5",
         max_buffer_size=10
     )
     await recorder.run()

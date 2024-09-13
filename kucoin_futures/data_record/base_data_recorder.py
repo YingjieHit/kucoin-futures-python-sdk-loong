@@ -96,7 +96,7 @@ class BaseDataRecorder(object):
     async def _subscribe_data(self):
         raise NotImplementedError("需要实现_subscribe_data")
 
-    async def _normalize_data(self, msg, local_ts) -> dict:
+    def _normalize_data(self, msg, local_ts) -> dict:
         # 必须含有data[]和ts字段
         raise NotImplementedError("需要实现_normalize_data")
 
