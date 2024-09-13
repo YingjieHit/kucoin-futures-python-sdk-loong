@@ -23,6 +23,8 @@ class BaseDataRecorder(object):
         self._data_record_task = None
 
     async def run(self):
+        # 确认存在目录
+        self._confirm_dir()
         # 开启时间校准协程
         self._tscns_calibrate_task = asyncio.create_task(self._tscns_calibrate_process())
         # 开启存储数据协程
@@ -32,6 +34,11 @@ class BaseDataRecorder(object):
 
         while True:
             await asyncio.sleep(60 * 60 * 24)
+
+    # 确认存在目录，如果不存在则创建
+    def _confirm_dir(self):
+        if not os.path.exists(self._file_dir):
+            os.makedirs(self._file_dir)  # 递归创建文件夹
 
     async def _write_header(self):
         await self._csv_writer.write_header_if_needed(self._file_path, self._header)
