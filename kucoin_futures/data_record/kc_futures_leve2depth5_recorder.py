@@ -51,7 +51,7 @@ async def main():
 
     recorder = KcFuturesLevel2Depth5Recorder(
         symbol=symbol,
-        file_dir=symbol,
+        file_dir=file_dir,
         max_buffer_size=10
     )
     await recorder.run()
