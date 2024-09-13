@@ -86,7 +86,9 @@ class TimeUtils(object):
 
     # 兼容s,ms,ns
     @staticmethod
-    def get_date_str_from_ts(ts: int):
+    def get_date_str_from_ts(ts: int|str):
+        if isinstance(ts, str):
+            ts = int(ts)
         ts_unit = TimeUtils.get_ts_unit(ts)
         if ts_unit == 's':
             ts_seconds = ts
