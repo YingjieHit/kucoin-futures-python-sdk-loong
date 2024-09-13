@@ -74,7 +74,6 @@ class BaseDataRecorder(object):
                     self._cur_date_str = date_str
                     # 更新当前存储path
                     self._flush_file_path()
-                    print(f"new file: {self._file_path}")
                     # 创建新的文件
                     await self._write_header()
 
@@ -95,6 +94,9 @@ class BaseDataRecorder(object):
 
     def _flush_file_path(self):
         self._flush_file_name()
+        print(f"flush file path: {self._file_path}")
+        print(f"flush file name: {self._file_name}")
+        print(f"flush file dir: {self._file_dir}")
         self._file_path = os.path.join(self._file_dir, self._file_name)
 
     def _flush_file_name(self):
