@@ -12,7 +12,7 @@ class KcFuturesTickerV2Recorder(BaseDataRecorder):
         self._ws_client = None
 
     def _flush_file_name(self):
-        self._file_name = f"{self._symbol}_tickerV2-{self._cur_date_str}.csv"
+        self._file_name = f"{self._symbol}-tickerV2-{self._cur_date_str}.csv"
 
     # 订阅数据
     async def _subscribe_data(self):
@@ -49,7 +49,7 @@ async def main():
     recorder = KcFuturesTickerV2Recorder(
         symbol=symbol,
         file_dir=file_dir,
-        max_buffer_size=10
+        max_buffer_size=100
     )
     await recorder.run()
 

@@ -12,7 +12,7 @@ class KcFuturesLevel2Depth50Recorder(BaseDataRecorder):
         self._ws_client = None
 
     def _flush_file_name(self):
-        self._file_name = f"{self._symbol}_level2Depth50-{self._cur_date_str}.csv"
+        self._file_name = f"{self._symbol}-level2Depth50-{self._cur_date_str}.csv"
 
     # 订阅数据
     async def _subscribe_data(self):
