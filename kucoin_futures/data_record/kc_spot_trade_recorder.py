@@ -23,7 +23,7 @@ class KcSpotTradeRecorder(BaseDataRecorder):
         # 返回必须含有data[]和ts字段
         data = msg.get('data')
         symbol = data.get('symbol')
-        ts = data.get('time')
+        ts = int(data.get('time'))
         sequence = data.get('sequence')
         side = data.get('side')
         size = float(data.get('size'))
