@@ -74,6 +74,7 @@ class BaseDataRecorder(object):
                     self._cur_date_str = date_str
                     # 更新当前存储path
                     self._flush_file_path()
+                    print(f"new file: {self._file_path}")
                     # 创建新的文件
                     await self._write_header()
 
