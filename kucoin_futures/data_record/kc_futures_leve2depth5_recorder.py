@@ -38,10 +38,10 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
     def _header(self):
         return (
                 ['symbol', 'ts', 'local_ts'] +
-                [f'bp{i}' for i in range(5)] +
-                [f'ap{i}' for i in range(5)] +
-                [f'bv{i}' for i in range(5)] +
-                [f'av{i}' for i in range(5)]
+                [f'bp{i}' for i in range(1, 6)] +
+                [f'ap{i}' for i in range(1, 6)] +
+                [f'bv{i}' for i in range(1, 6)] +
+                [f'av{i}' for i in range(1, 6)]
         )
 
 async def main():
