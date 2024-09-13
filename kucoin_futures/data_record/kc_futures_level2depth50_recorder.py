@@ -5,47 +5,43 @@ from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.data_record.base_data_recorder import BaseDataRecorder
 
 
-class KcFuturesTradeRecorder(BaseDataRecorder):
+class KcFuturesLevel2Depth50Recorder(BaseDataRecorder):
     def __init__(self, symbol, file_dir, max_buffer_size=10):
         super().__init__(symbol, file_dir, max_buffer_size)
         self._client = WsToken()
         self._ws_client = None
 
     def _flush_file_name(self):
-        self._file_name = f"kc-futures-trade-{self._symbol}-{self._cur_date_str}.csv"
+        self._file_name = f"kc-futures-level2Depth50-{self._symbol}-{self._cur_date_str}.csv"
 
     # 订阅数据
     async def _subscribe_data(self):
         self._ws_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_msg, private=False)
-        await self._ws_client.subscribe(f"/contractMarket/execution:{self._symbol}")
+        await self._ws_client.subscribe(f"/contractMarket/level2Depth50:{self._symbol}")
 
     def _normalize_data(self, msg, local_ts) -> dict:
         # 返回必须含有data[]和ts字段
         data = msg.get('data')
-        symbol = data.get('symbol')
+        bids = data.get('bids')
+        asks = data.get('asks')
         ts = data.get('ts')
-        sequence = data.get('sequence')
-        side = data.get('side')
-        size = data.get('size')
-        price = float(data.get('price'))
-        maker_user_id = data.get('makerUserId')
-        taker_order_id = data.get('takerOrderId')
-        taker_user_id = data.get('takerUserId')
-        maker_order_id = data.get('makerOrderId')
-        trade_id = data.get('tradeId')
-
         return {
             "ts": ts,
-            "data": [symbol, ts, local_ts] +
-                    [sequence, side, size, price] +
-                    [maker_user_id, taker_order_id, taker_user_id, maker_order_id, trade_id]
+            "data": [self._symbol, ts, local_ts] +
+                    [float(item[0]) for item in bids] +
+                    [float(item[0]) for item in asks] +
+                    [item[1] for item in bids] +
+                    [item[1] for item in asks]
         }
 
     @property
     def _header(self):
         return (
                 ['symbol', 'ts', 'local_ts'] +
-                ['sequence', 'side', 'size', 'price', 'makerUserId', 'takerOrderId', 'takerUserId', 'makerOrderId', 'tradeId']
+                [f'bp{i}' for i in range(1, 51)] +
+                [f'ap{i}' for i in range(1, 51)] +
+                [f'bv{i}' for i in range(1, 51)] +
+                [f'av{i}' for i in range(1, 51)]
         )
 
 async def main():
@@ -53,7 +49,7 @@ async def main():
     symbol = sys.argv[1]
     file_dir = sys.argv[2]
 
-    recorder = KcFuturesTradeRecorder(
+    recorder = KcFuturesLevel2Depth50Recorder(
         symbol=symbol,
         file_dir=file_dir,
         max_buffer_size=10

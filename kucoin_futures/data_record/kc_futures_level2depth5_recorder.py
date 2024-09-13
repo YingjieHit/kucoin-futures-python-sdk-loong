@@ -5,19 +5,19 @@ from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.data_record.base_data_recorder import BaseDataRecorder
 
 
-class KcFuturesLevel2Depth50Recorder(BaseDataRecorder):
+class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
     def __init__(self, symbol, file_dir, max_buffer_size=10):
         super().__init__(symbol, file_dir, max_buffer_size)
         self._client = WsToken()
         self._ws_client = None
 
     def _flush_file_name(self):
-        self._file_name = f"{self._symbol}-level2Depth50-{self._cur_date_str}.csv"
+        self._file_name = f"kc-futures-level2Depth5-{self._symbol}-{self._cur_date_str}.csv"
 
     # 订阅数据
     async def _subscribe_data(self):
         self._ws_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_msg, private=False)
-        await self._ws_client.subscribe(f"/contractMarket/level2Depth50:{self._symbol}")
+        await self._ws_client.subscribe(f"/contractMarket/level2Depth5:{self._symbol}")
 
     def _normalize_data(self, msg, local_ts) -> dict:
         # 返回必须含有data[]和ts字段
@@ -38,10 +38,10 @@ class KcFuturesLevel2Depth50Recorder(BaseDataRecorder):
     def _header(self):
         return (
                 ['symbol', 'ts', 'local_ts'] +
-                [f'bp{i}' for i in range(1, 51)] +
-                [f'ap{i}' for i in range(1, 51)] +
-                [f'bv{i}' for i in range(1, 51)] +
-                [f'av{i}' for i in range(1, 51)]
+                [f'bp{i}' for i in range(1, 6)] +
+                [f'ap{i}' for i in range(1, 6)] +
+                [f'bv{i}' for i in range(1, 6)] +
+                [f'av{i}' for i in range(1, 6)]
         )
 
 async def main():
@@ -49,7 +49,7 @@ async def main():
     symbol = sys.argv[1]
     file_dir = sys.argv[2]
 
-    recorder = KcFuturesLevel2Depth50Recorder(
+    recorder = KcFuturesLevel2Depth5Recorder(
         symbol=symbol,
         file_dir=file_dir,
         max_buffer_size=10
