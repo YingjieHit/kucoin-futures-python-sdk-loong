@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.data_record.base_data_recorder import BaseDataRecorder
@@ -44,9 +45,13 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
         )
 
 async def main():
+    # 读取脚本参数，第一个参数为symbol，第二个参数为目录
+    symbol = sys.argv[1]
+    file_dir = sys.argv[2]
+
     recorder = KcFuturesLevel2Depth5Recorder(
-        symbol="XBTUSDTM",
-        file_dir="/home/ec2-user/HFT_data/KucoinFuture/level2Depth5",
+        symbol=symbol,
+        file_dir=symbol,
         max_buffer_size=10
     )
     await recorder.run()
