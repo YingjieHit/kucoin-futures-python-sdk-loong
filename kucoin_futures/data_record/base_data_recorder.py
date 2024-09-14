@@ -23,6 +23,8 @@ class BaseDataRecorder(object):
         self._data_record_task = None
 
     async def run(self):
+        # 初始化
+        await self._init()
         # 确认存在目录
         self._confirm_dir()
         # 开启时间校准协程
@@ -35,6 +37,10 @@ class BaseDataRecorder(object):
         while True:
             await asyncio.sleep(60 * 60 * 24)
 
+    # 初始化
+    async def _init(self):
+        pass
+
     # 确认存在目录，如果不存在则创建
     def _confirm_dir(self):
         if not os.path.exists(self._file_dir):
@@ -44,12 +50,16 @@ class BaseDataRecorder(object):
         await self._csv_writer.write_header_if_needed(self._file_path, self._header)
 
     async def _deal_msg(self, msg):
-        # 1. 记录本地时间戳
-        local_ts = str(self._tscns.rdns()) + '\t'
-        # 2. 数据标准化
-        data = self._normalize_data(msg, local_ts)
-        # 3. 数据放入消息队列
-        await self._queue.put(data)
+        try:
+            # 1. 记录本地时间戳
+            local_ts = str(self._tscns.rdns()) + '\t'
+            # 2. 数据标准化
+            data = self._normalize_data(msg, local_ts)
+            # 3. 数据放入消息队列
+            if data:
+                await self._queue.put(data)
+        except Exception as e:
+            print(e)
 
     # tscns校准函数
     async def _tscns_calibrate_process(self):
