@@ -14,11 +14,11 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
         await self._client.start()
 
     def _flush_file_name(self):
-        self._file_name = f"bn-futures-bookTicker-{self._symbol}-{self._cur_date_str}.csv"
+        self._file_name = f"bn-futures-aggTrade-{self._symbol}-{self._cur_date_str}.csv"
 
     # 订阅数据
     async def _subscribe_data(self):
-        await self._client.book_ticker(symbol=self._symbol)
+        await self._client.agg_trade(symbol=self._symbol)
 
     def _normalize_data(self, msg, local_ts) -> dict|None:
         # 返回必须含有data[]和ts字段
@@ -29,22 +29,27 @@ class KcFuturesLevel2Depth5Recorder(BaseDataRecorder):
         symbol = msg.get('s')
         ts = msg.get('T')
         event_ts = msg.get('E')
-        bp1 = float(msg.get('b'))
-        ap1 = float(msg.get('a'))
-        bv1 = float(msg.get('B'))
-        av1 = float(msg.get('A'))
+        price = float(msg.get('p'))
+        quantity = float(msg.get('q'))
+        is_buyer_maker = msg.get('m')
+
+        agg_id = msg.get('a')
+        first_id = msg.get('f')
+        last_id = msg.get('l')
 
         return {
             "ts": ts,
             "data": [symbol, ts, event_ts, local_ts] +
-                    [bp1, ap1, bv1, av1]
+                    [price, quantity, is_buyer_maker] +
+                    [agg_id, first_id, last_id]
         }
 
     @property
     def _header(self):
         return (
                 ['symbol', 'ts', 'event_ts', 'local_ts'] +
-                ['bp1', 'ap1', 'bv1', 'av1']
+                ['price', 'quantity', 'isBuyerMaker'] +
+                ['aggId', 'firstId', 'lastId']
         )
 
 async def main():
