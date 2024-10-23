@@ -44,6 +44,7 @@ MIN_SIZE = {
 BN_TO_KC_SYMBOL = {
     'BTCUSD_PERP': 'XBTUSDM',
     'ETHUSD_PERP': 'ETHUSDM',
+    'SOLUSD_PERP': 'SOLUSDM',
 
 }
 
@@ -51,6 +52,7 @@ BN_TO_KC_SYMBOL = {
 KC_TO_BN_SYMBOL = {
     'XBTUSDM': 'BTCUSD_PERP',
     'ETHUSDM': 'ETHUSD_PERP',
+    'SOLUSDM': 'SOLUSD_PERP',
 }
 
 # 定义kc和bn之间的周期转化
