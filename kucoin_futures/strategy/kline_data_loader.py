@@ -133,9 +133,9 @@ class KlineDataLoader(object):
                     symbol=symbol,
                     ts=kline[0] // 1000,
                     open=float(kline[1]),
-                    close=float(kline[4]),
                     high=float(kline[2]),
                     low=float(kline[3]),
+                    close=float(kline[4]),
                     volume=int(kline[5]),
                     frequency=freq,
                 )
