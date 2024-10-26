@@ -3,7 +3,7 @@ from ccxt.pro.okx import okx
 from ccxt.pro.binance import binance
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
 from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           Level2Depth5Event, BarEvent, PositionChangeEvent,
+                                           OkxOrderBook5Event, BarEvent, PositionChangeEvent,
                                            CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
 from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar
 from kucoin_futures.common.app_logger import app_logger
@@ -44,10 +44,10 @@ class OkxBaseCta(object):
                 if event.type == EventType.BAR:
                     # 处理k线
                     await self.on_bar(event.data)
-                elif event.type == EventType.LEVEL2DEPTH5:
-                    # 处理ticker
-                    # await self.on_level2_depth5(event.data)
-                    pass
+                elif event.type == EventType.OKX_ORDER_BOOK5:
+                    # 处理order book5
+                    await self.on_order_book5(event.data)
+
                 # elif event.type == EventType.TRADE_ORDER:
                 #     # 处理order回报
                 #     await self.on_order(event.data)
@@ -70,7 +70,7 @@ class OkxBaseCta(object):
 
     async def _subscribe_okx_order_book5(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
-        print("subscribe_okx_order_book5")
+        print("subscribe okx_order_book5")
         await asyncio.create_task(self._watch_okx_order_book5(symbol))
 
     async def _watch_okx_order_book5(self, symbol):
@@ -79,7 +79,10 @@ class OkxBaseCta(object):
                 symbol,
                 params={'channel': 'books5'},
             )
-            print(order_book5)
+            await self._event_queue.put(OkxOrderBook5Event(order_book5))
 
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
+
+    async def on_order_book5(self, order_book5):
+        raise NotImplementedError("需要实现on_order_book5")
