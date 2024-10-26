@@ -31,8 +31,15 @@ class OkxBaseCta(object):
         self._process_event_task: asyncio.Task | None = None
         self._order_book5_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
+        self._schedule_task: asyncio.Task | None = None
+
+        self._okx_markets: dict|None = None
 
     async def init(self):
+        # 读取市场信息
+        await self._load_markets()
+        # 创建定时任务
+        self._schedule_task = asyncio.create_task(self._process_schedule())
         # 创建事件处理任务
         self._process_event_task = asyncio.create_task(self._process_event())
 
@@ -83,8 +90,29 @@ class OkxBaseCta(object):
             )
             await self._event_queue.put(OkxOrderBook5Event(order_book5))
 
+    async def _process_schedule(self):
+        while True:
+            await self._load_markets()
+            await asyncio.sleep(60 * 60 * 24)
+
+
+    async def _load_markets(self):
+        self._okx_markets = await self._oxk_exchange.load_markets(reload=True)
+
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
 
     async def on_order_book5(self, order_book5):
         raise NotImplementedError("需要实现on_order_book5")
+
+    # 获取最小下单张数
+    @property
+    def min_contract(self):
+        return self._okx_markets[self._symbol]['limits']['amount']['min']
+
+    # 获取每张代表多少数量的币(合约乘数)
+    @property
+    def contract_size(self):
+        return self._okx_markets[self._symbol]['contractSize']
+
+
