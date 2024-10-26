@@ -68,13 +68,14 @@ class OkxBaseCta(object):
                 bar = ccxt_binance_adapter.parse_kline(ohlcv, symbol, kline_frequency)
                 await self._event_queue.put(BarEvent(bar))
 
+    async def _subscribe_okx_order_book5(self, symbol):
+        # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
+        await asyncio.create_task(self._watch_okx_order_book5(symbol))
 
     async def _watch_okx_order_book5(self, symbol):
         while True:
             order_book5 = await self._oxk_exchange.watch_order_book(symbol, params={'channel': 'books5'})
             print(order_book5)
-
-
 
 
     async def on_bar(self, bar):
