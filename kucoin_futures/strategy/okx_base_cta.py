@@ -64,6 +64,7 @@ class OkxBaseCta(object):
                 #     # 处理持仓变化
                 #     await self.on_position_change(event.data)
             except Exception as e:
+                print(f"process_event Error {str(e)}")
                 await app_logger.error(f"process_event Error {str(e)}")
 
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
