@@ -32,6 +32,7 @@ class TimeUtils(object):
     def get_granularity_by_freq(freq: str):
         # 返回1代表1分钟
         # 1min, 5min, 15min, 30min, 1hour, 2hour, 4hour, 8hour, 12hour, 1day, 1week
+        freq = TimeUtils.adapt_time_desc(freq)
         if freq not in ['1min', '5min', '15min', '30min', '1hour', '2hour', '4hour', '8hour', '12hour', '1day',
                         '1week']:
             raise ValueError(
@@ -55,6 +56,7 @@ class TimeUtils(object):
     @staticmethod
     def calc_seconds_by_freq_count(freq: str, n: int):
         # 1min, 3min, 15min, 30min, 1hour, 2hour, 4hour, 6hour, 8hour, 12hour, 1day, 1week
+        freq = TimeUtils.adapt_time_desc(freq)
         if freq not in ['1min', '3min', '5min', '15min', '30min', '1hour', '2hour', '4hour', '6hour', '8hour', '12hour',
                         '1day', '1week']:
             raise ValueError(
@@ -86,7 +88,7 @@ class TimeUtils(object):
 
     # 兼容s,ms,ns
     @staticmethod
-    def get_date_str_from_ts(ts: int|str):
+    def get_date_str_from_ts(ts: int | str):
         if isinstance(ts, str):
             ts = int(ts)
         ts_unit = TimeUtils.get_ts_unit(ts)
@@ -120,6 +122,19 @@ class TimeUtils(object):
     @staticmethod
     def get_cur_date_str():
         return datetime.now().strftime('%Y-%m-%d')
+
+    # 兼容时间描述的单字母简写和全称 例如 m 转化为 min
+    @staticmethod
+    def adapt_time_desc(freq: str):
+        if freq[-1] == 'm':
+            freq = freq + 'in'
+        elif freq[-1] == 'h':
+            freq = freq + 'our'
+        elif freq[-1] == 'd':
+            freq = freq + 'ay'
+        elif freq[-1] == 'w':
+            freq = freq + 'eek'
+        return freq
 
 
 time_utils = TimeUtils()
