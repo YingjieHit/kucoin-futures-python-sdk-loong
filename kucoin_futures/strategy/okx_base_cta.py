@@ -135,6 +135,7 @@ class OkxBaseCta(object):
     async def _watch_positions(self, symbol):
         while True:
             positions = await self._okx_exchange.watch_positions(symbols=[symbol])
+            print(f"_watch_positions: {positions}")
             for position in positions:
                 if position['symbol'] == symbol:
                     await self._event_queue.put(PositionChangeEvent(position))
