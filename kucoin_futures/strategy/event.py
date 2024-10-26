@@ -15,6 +15,8 @@ class EventType:
     POSITION_CHANGE = 'POSITION_CHANGE'
     BAR = 'BAR'
 
+    OKX_ORDER_BOOK5 = 'OKX_ORDER_BOOK5'
+
 
 class Event(object):
     def __init__(self, data):
@@ -99,3 +101,8 @@ class PositionChangeEvent(Event):
         super().__init__(data)
         self.type = EventType.POSITION_CHANGE
 
+class OkxOrderBook5Event(Event):
+    """okx order book5事件"""
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.type = EventType.OKX_ORDER_BOOK5
