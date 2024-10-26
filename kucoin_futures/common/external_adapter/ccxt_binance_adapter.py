@@ -11,7 +11,7 @@ class CcxtBinanceAdapter(object):
     def parse_kline(ccxt_kline: list, symbol: str|None=None, frequency: str|None=None) -> Bar:
         return Bar(
             symbol=symbol,
-            ts=ccxt_kline[0],
+            ts=ccxt_kline[0]//1000,
             open=ccxt_kline[1],
             high=ccxt_kline[2],
             low=ccxt_kline[3],
