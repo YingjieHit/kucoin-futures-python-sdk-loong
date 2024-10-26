@@ -70,6 +70,7 @@ class OkxBaseCta(object):
 
     async def _subscribe_okx_order_book5(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
+        print("subscribe_okx_order_book5")
         await asyncio.create_task(self._watch_okx_order_book5(symbol))
 
     async def _watch_okx_order_book5(self, symbol):
