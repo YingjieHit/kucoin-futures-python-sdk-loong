@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 
 @dataclass
@@ -34,7 +35,8 @@ class Bar:
     high: float
     low: float
     volume: float
-    turnover: float
+    turnover: Optional[float] = None
+    frequency: Optional[str] = None
 
 
 @dataclass

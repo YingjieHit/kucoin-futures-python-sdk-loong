@@ -1,10 +1,11 @@
 import asyncio
 from ccxt.pro.okx import okx
 from ccxt.pro.binance import binance
+from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
 from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
                                            Level2Depth5Event, BarEvent, PositionChangeEvent,
                                            CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
-from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder
+from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar
 from kucoin_futures.common.app_logger import app_logger
 
 
@@ -37,13 +38,36 @@ class OkxBaseCta(object):
         raise NotImplementedError("需要实现run")
 
     async def _process_event(self):
-        pass
+        while True:
+            try:
+                event = await self._event_queue.get()
+                if event.type == EventType.BAR:
+                    # 处理k线
+                    await self.on_bar(event.data)
+                elif event.type == EventType.LEVEL2DEPTH5:
+                    # 处理ticker
+                    # await self.on_level2_depth5(event.data)
+                    pass
+                # elif event.type == EventType.TRADE_ORDER:
+                #     # 处理order回报
+                #     await self.on_order(event.data)
+                # elif event.type == EventType.POSITION_CHANGE:
+                #     # 处理持仓变化
+                #     await self.on_position_change(event.data)
+            except Exception as e:
+                await app_logger.error(f"process_event Error {str(e)}")
 
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
+        # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         await asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
 
     async def _watch_binance_kline(self, symbol, kline_frequency):
         while True:
-            ohlcv = await self._binance_exchange.watch_ohlcv(symbol, kline_frequency)
-            print(ohlcv)
-            print(type(ohlcv))
+            ohlcv_list = await self._binance_exchange.watch_ohlcv(symbol, kline_frequency)
+            for ohlcv in ohlcv_list:
+                bar = ccxt_binance_adapter.parse_kline(ohlcv, symbol, kline_frequency)
+                await self._event_queue.put(BarEvent(bar))
+
+
+    async def on_bar(self, bar):
+        raise NotImplementedError("需要实现on_bar")
