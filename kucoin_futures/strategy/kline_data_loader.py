@@ -137,7 +137,7 @@ class KlineDataLoader(object):
                     high=float(kline[2]),
                     low=float(kline[3]),
                     volume=int(kline[5]),
-                    turnover=float(kline[7])
+                    frequency=freq,
                 )
             )
 
