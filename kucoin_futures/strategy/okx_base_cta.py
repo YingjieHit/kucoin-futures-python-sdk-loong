@@ -92,7 +92,7 @@ class OkxBaseCta(object):
                 #     await self.on_order(event.data)
                 elif event.type == EventType.POSITION_CHANGE:
                     # 处理持仓变化
-                    await self.on_position_change(event.data)
+                    await self.on_position(event.data)
             except Exception as e:
                 print(f"process_event Error {str(e)}")
                 await app_logger.error(f"process_event Error {str(e)}")
@@ -169,8 +169,8 @@ class OkxBaseCta(object):
     async def on_order_book5(self, order_book5):
         raise NotImplementedError("需要实现on_order_book5")
 
-    async def on_position_change(self, position_change):
-        raise NotImplementedError("需要实现on_position_change")
+    async def on_position(self, position_change):
+        raise NotImplementedError("需要实现on_position")
 
     # 获取最小下单张数
     @property
