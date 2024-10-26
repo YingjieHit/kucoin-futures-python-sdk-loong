@@ -50,6 +50,17 @@ class OkxBaseCta(object):
     async def run(self):
         raise NotImplementedError("需要实现run")
 
+    async def fetch_position(self, symbol):
+        position = await self._okx_exchange.fetch_position(symbol)
+        if position['contractSize'] == 0 and position['side'] is None:
+            return 0
+        elif position['side'] == 'long':
+            return position['contractSize']
+        elif position['side'] == 'short':
+            return -position['contractSize']
+        else:
+            raise ValueError(f"fetch_position error: {position}")
+
     async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=False):
         if type != 'market' and price is None:
             raise ValueError("price can not be None when type is not 'market'")
