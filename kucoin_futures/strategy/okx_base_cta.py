@@ -74,7 +74,7 @@ class OkxBaseCta(object):
 
     async def _watch_okx_order_book5(self, symbol):
         while True:
-            order_book5 = await self._oxk_exchange.watch_order_book(symbol, params={'channel': 'books5'})
+            order_book5 = await self._oxk_exchange.watch_order_book(symbol, params={'channel': 'books'})
             print(order_book5)
 
 
