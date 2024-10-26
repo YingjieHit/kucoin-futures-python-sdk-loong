@@ -29,6 +29,8 @@ class OkxBaseCta(object):
         self._cancel_order_task_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
+        self._order_book5_task: asyncio.Task | None = None
+        self._bn_bar_task: asyncio.Task | None = None
 
     async def init(self):
         # 创建事件处理任务
@@ -59,7 +61,7 @@ class OkxBaseCta(object):
 
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
-        await asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
+        self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
 
     async def _watch_binance_kline(self, symbol, kline_frequency):
         while True:
@@ -71,7 +73,7 @@ class OkxBaseCta(object):
     async def _subscribe_okx_order_book5(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         print("subscribe okx_order_book5")
-        await asyncio.create_task(self._watch_okx_order_book5(symbol))
+        self._order_book5_task = asyncio.create_task(self._watch_okx_order_book5(symbol))
 
     async def _watch_okx_order_book5(self, symbol):
         while True:
