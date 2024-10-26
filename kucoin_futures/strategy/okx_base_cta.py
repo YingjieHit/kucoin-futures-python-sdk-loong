@@ -50,7 +50,7 @@ class OkxBaseCta(object):
     async def run(self):
         raise NotImplementedError("需要实现run")
 
-    async def fetch_position(self, symbol):
+    async def _fetch_position(self, symbol):
         position = await self._okx_exchange.fetch_position(symbol)
         if position['contractSize'] == 0 and position['side'] is None:
             return 0
