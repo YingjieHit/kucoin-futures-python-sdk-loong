@@ -52,7 +52,7 @@ class OkxBaseCta(object):
 
     async def _fetch_position(self, symbol):
         position = await self._okx_exchange.fetch_position(symbol)
-        if position['contractSize'] == 0 and position['side'] is None:
+        if position is None or position['contractSize'] == 0 and position['side'] is None:
             return 0
         elif position['side'] == 'long':
             return position['contractSize']
