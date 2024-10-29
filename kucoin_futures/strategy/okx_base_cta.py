@@ -43,6 +43,7 @@ class OkxBaseCta(object):
         self._is_subscribe_okx_order_book5 = False
         self._is_subscribe_bn_kline = False
         self._is_subscribe_position = False
+        self._subscribe_monitor: asyncio.Task | None = None  # 订阅监控协程
 
     async def init(self):
         # 读取市场信息
@@ -53,6 +54,8 @@ class OkxBaseCta(object):
         self._process_event_task = asyncio.create_task(self._process_event())
         # 创建交易执行任务
         self._process_execute_order_task = asyncio.create_task(self._execute_order())
+        # 创建订阅监控任务
+        self._subscribe_monitor = asyncio.create_task(self._subscribe_monitoring())
 
     async def run(self):
         raise NotImplementedError("需要实现run")
@@ -128,6 +131,10 @@ class OkxBaseCta(object):
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
+    async def _subscribe_monitoring(self):
+        while True:
+            await asyncio.sleep(60 * 60 * 24)
+
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
@@ -200,3 +207,5 @@ class OkxBaseCta(object):
     @property
     def contract_size(self):
         return self._okx_markets[self._symbol]['contractSize']
+
+
