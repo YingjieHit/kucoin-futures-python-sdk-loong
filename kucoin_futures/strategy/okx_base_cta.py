@@ -100,7 +100,6 @@ class OkxBaseCta(object):
                 elif event.type == EventType.POSITION_CHANGE:
                     # 处理持仓变化
                     await self.on_position(event.data)
-                self._send_msg(f"{self._strategy_name} process_event {event.type} {event.data}")  # 调试用
             except Exception as e:
                 print(f"{self._strategy_name} process_event Error {str(e)}")
                 self._send_msg(f"process_event Error {str(e)}")
