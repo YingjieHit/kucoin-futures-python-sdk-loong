@@ -7,14 +7,17 @@ from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEv
                                            CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
 from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar
 from kucoin_futures.common.app_logger import app_logger
+from kucoin_futures.common.msg_base_client import MsgBaseClient
 
 
 class OkxBaseCta(object):
-    def __init__(self, symbol, key, secret, passphrase):
+    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient|None = None, strategy_name="no name"):
         self._symbol = symbol
         self._key = key
         self._secret = secret
         self._passphrase = passphrase
+        self._msg_client = msg_client
+        self._strategy_name = strategy_name
 
         self._okx_exchange = okx({
             'apiKey': key,
@@ -97,8 +100,10 @@ class OkxBaseCta(object):
                 elif event.type == EventType.POSITION_CHANGE:
                     # 处理持仓变化
                     await self.on_position(event.data)
+                self._msg_client.send_msg(f"process_event {event.type} {event.data}")  # 调试用
             except Exception as e:
-                print(f"process_event Error {str(e)}")
+                print(f"{self._strategy_name} process_event Error {str(e)}")
+                self._msg_client.send_msg(f"process_event Error {str(e)}")
                 await app_logger.error(f"process_event Error {str(e)}")
 
     async def _execute_order(self):
@@ -116,6 +121,7 @@ class OkxBaseCta(object):
                         price=co.price,
                     )
             except Exception as e:
+                self._msg_client.send_msg(f"execute_order_process Error {str(e)}")
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
