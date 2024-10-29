@@ -104,13 +104,14 @@ class OkxBaseCta(object):
                 if event.type == EventType.CREATE_ORDER:
                     # 发送订单
                     co: CreateOrder = event.data
-                    await self._okx_exchange.create_order(
+                    ret = await self._okx_exchange.create_order(
                         symbol=co.symbol,
                         type=co.type,
                         side=co.side,
                         amount=co.size,
                         price=co.price,
                     )
+                    print(f"下单结果: {ret}")
             except Exception as e:
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
