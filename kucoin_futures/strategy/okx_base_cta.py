@@ -100,10 +100,10 @@ class OkxBaseCta(object):
                 elif event.type == EventType.POSITION_CHANGE:
                     # 处理持仓变化
                     await self.on_position(event.data)
-                self._msg_client.send_msg(f"process_event {event.type} {event.data}")  # 调试用
+                self._send_msg(f"{self._strategy_name} process_event {event.type} {event.data}")  # 调试用
             except Exception as e:
                 print(f"{self._strategy_name} process_event Error {str(e)}")
-                self._msg_client.send_msg(f"process_event Error {str(e)}")
+                self._send_msg(f"process_event Error {str(e)}")
                 await app_logger.error(f"process_event Error {str(e)}")
 
     async def _execute_order(self):
@@ -121,7 +121,7 @@ class OkxBaseCta(object):
                         price=co.price,
                     )
             except Exception as e:
-                self._msg_client.send_msg(f"execute_order_process Error {str(e)}")
+                self._send_msg(f"{self._strategy_name} execute_order_process Error {str(e)}")
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
@@ -163,6 +163,10 @@ class OkxBaseCta(object):
                     # print(f"持仓方向: {position['side']}向")
                     # print(f"时间：{position['datetime']}")
                     # print("*" * 20)
+
+    def _send_msg(self, msg):
+        if self._msg_client is not None:
+            self._msg_client.send_msg(msg)
 
     async def _process_schedule(self):
         while True:
