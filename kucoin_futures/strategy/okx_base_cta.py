@@ -137,6 +137,10 @@ class OkxBaseCta(object):
 
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
+        if self._bn_bar_task is not None:
+            self._bn_bar_task.cancel()
+            self._bn_bar_task = None
+
         self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
         self._is_subscribe_bn_kline = True
 
@@ -150,6 +154,9 @@ class OkxBaseCta(object):
     async def _subscribe_okx_order_book5(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         # print("subscribe okx_order_book5")
+        if self._order_book5_task is not None:
+            self._order_book5_task.cancel()
+            self._order_book5_task = None
         self._order_book5_task = asyncio.create_task(self._watch_okx_order_book5(symbol))
         self._is_subscribe_okx_order_book5 = True
 
