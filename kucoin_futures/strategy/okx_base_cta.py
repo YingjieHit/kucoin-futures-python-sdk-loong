@@ -55,7 +55,7 @@ class OkxBaseCta(object):
         # 创建交易执行任务
         self._process_execute_order_task = asyncio.create_task(self._execute_order())
         # 创建订阅监控任务
-        self._subscribe_monitor = asyncio.create_task(self._subscribe_monitoring())
+        self._subscribe_monitor = asyncio.create_task(self._subscribe_monitoring_process())
 
     async def run(self):
         raise NotImplementedError("需要实现run")
@@ -131,7 +131,7 @@ class OkxBaseCta(object):
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
-    async def _subscribe_monitoring(self):
+    async def _subscribe_monitoring_process(self):
         while True:
             await asyncio.sleep(60 * 60 * 24)
 
