@@ -40,6 +40,10 @@ class OkxBaseCta(object):
 
         self._okx_markets: dict | None = None
 
+        self._is_subscribe_okx_order_book5 = False
+        self._is_subscribe_bn_kline = False
+        self._is_subscribe_position = False
+
     async def init(self):
         # 读取市场信息
         await self._load_markets()
@@ -127,6 +131,7 @@ class OkxBaseCta(object):
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
+        self._is_subscribe_bn_kline = True
 
     async def _watch_binance_kline(self, symbol, kline_frequency):
         while True:
@@ -139,6 +144,7 @@ class OkxBaseCta(object):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         # print("subscribe okx_order_book5")
         self._order_book5_task = asyncio.create_task(self._watch_okx_order_book5(symbol))
+        self._is_subscribe_okx_order_book5 = True
 
     async def _watch_okx_order_book5(self, symbol):
         while True:
@@ -151,6 +157,7 @@ class OkxBaseCta(object):
     async def _subscribe_positions(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
         self._position_change_task = asyncio.create_task(self._watch_positions(symbol))
+        self._is_subscribe_position = True
 
     async def _watch_positions(self, symbol):
         while True:
