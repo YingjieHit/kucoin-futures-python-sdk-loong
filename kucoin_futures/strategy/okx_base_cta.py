@@ -115,7 +115,6 @@ class OkxBaseCta(object):
                         amount=co.size,
                         price=co.price,
                     )
-                    print(f"下单结果: {ret}")
             except Exception as e:
                 print(f"execute_order_process Error {str(e)}")
                 await app_logger.error(f"execute_order_process Error {str(e)}")
