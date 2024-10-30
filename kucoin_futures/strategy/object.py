@@ -90,6 +90,7 @@ class CreateOrder:
     client_oid: str = ''
     post_only: bool = True
     cancel_after: float = -1
+    margin_mode: str = ''
 
 
 @dataclass
