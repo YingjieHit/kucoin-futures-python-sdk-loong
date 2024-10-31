@@ -56,11 +56,11 @@ class KcFuturesBaseCta(object):
     async def run(self):
         raise NotImplementedError("需要实现run")
 
-    async def _fetch_position(self, symbol, mgn_mode='cross'):
+    async def _fetch_position(self, symbol, mgn_mode='isolated'):
         positions = await self._kc_futures_exchange.fetch_positions([symbol])
         for position in positions:
             # cross 全仓, isolated 逐仓
-            if position['info']['mgnMode'] == mgn_mode:
+            if position['marginMode'] == mgn_mode:
                 if position is None or (position['contracts'] == 0 and position['side'] is None):
                     return 0
                 elif position['side'] == 'long':
