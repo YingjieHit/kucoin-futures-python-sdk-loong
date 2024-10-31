@@ -35,10 +35,11 @@ class KcFuturesBaseCta(object):
         self._binance_exchange = binance()
 
     async def init(self):
-        # 创建事件处理任务
-        self._process_event_task = asyncio.create_task(self._process_event())
         # 读取市场信息
         await self._load_markets()
+        # 创建事件处理任务
+        self._process_event_task = asyncio.create_task(self._process_event())
+
 
     async def _process_event(self):
         while True:
@@ -83,7 +84,7 @@ class KcFuturesBaseCta(object):
             self._msg_client.send_msg(msg)
 
     async def _load_markets(self):
-        self._okx_markets = await self._kc_futures_exchange.load_markets(reload=True)
+        self._kc_futures_markets = await self._kc_futures_exchange.load_markets(reload=True)
 
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
