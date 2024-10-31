@@ -1,10 +1,11 @@
 import asyncio
-from ccxt.pro.binance import binance
+from ccxt.pro import binance, kucoinfutures
 
 from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.event import (EventType, BarEvent)
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
+
 
 
 class KcFuturesBaseCta(object):
@@ -17,16 +18,27 @@ class KcFuturesBaseCta(object):
         self._msg_client = msg_client
         self._strategy_name = strategy_name
 
+        self._kc_futures_exchange = kucoinfutures({
+            'apiKey': key,
+            'secret': secret,
+            'password': passphrase,
+            'enableRateLimit': True,
+        })
+
         self._event_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
+
+        self._kc_futures_markets: dict | None = None
 
         self._binance_exchange = binance()
 
     async def init(self):
         # 创建事件处理任务
         self._process_event_task = asyncio.create_task(self._process_event())
+        # 读取市场信息
+        await self._load_markets()
 
     async def _process_event(self):
         while True:
@@ -70,5 +82,18 @@ class KcFuturesBaseCta(object):
         if self._msg_client is not None:
             self._msg_client.send_msg(msg)
 
+    async def _load_markets(self):
+        self._okx_markets = await self._kc_futures_exchange.load_markets(reload=True)
+
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
+
+   # 获取最小下单张数
+    @property
+    def min_contract(self):
+        return self._kc_futures_markets[self._symbol]['limits']['amount']['min']
+
+    # 获取每张代表多少数量的币(合约乘数)
+    @property
+    def contract_size(self):
+        return self._kc_futures_markets[self._symbol]['contractSize']
