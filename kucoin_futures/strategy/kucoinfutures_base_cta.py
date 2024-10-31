@@ -1,3 +1,6 @@
+"""
+因订阅ccxt的接口有断流风险，暂时停用, 请使用 kc_futures_base_cta.py
+"""
 import asyncio
 from ccxt.pro import kucoinfutures
 from ccxt.pro.binance import binance
