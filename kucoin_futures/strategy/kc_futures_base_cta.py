@@ -3,7 +3,8 @@ from ccxt.pro.binance import binance
 
 from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_base_client import MsgBaseClient
-from kucoin_futures.strategy.event import (EventType)
+from kucoin_futures.strategy.event import (EventType, BarEvent)
+from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
 
 
 class KcFuturesBaseCta(object):
@@ -19,6 +20,7 @@ class KcFuturesBaseCta(object):
         self._event_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
+        self._bn_bar_task: asyncio.Task | None = None
 
         self._binance_exchange = binance()
 
@@ -47,6 +49,22 @@ class KcFuturesBaseCta(object):
                 print(f"{self._strategy_name} process_event Error {str(e)}")
                 self._send_msg(f"{self._strategy_name} process_event Error {str(e)}")
                 await app_logger.error(f"{self._strategy_name} process_event Error {str(e)}")
+
+    async def _subscribe_bn_kline(self, symbol, kline_frequency):
+        # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
+        if self._bn_bar_task is not None:
+            self._bn_bar_task.cancel()
+            self._bn_bar_task = None
+
+        self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
+        self._is_subscribe_bn_kline = True
+
+    async def _watch_binance_kline(self, symbol, kline_frequency):
+        while True:
+            ohlcv_list = await self._binance_exchange.watch_ohlcv(symbol, kline_frequency)
+            for ohlcv in ohlcv_list:
+                bar = ccxt_binance_adapter.parse_kline(ohlcv, symbol, kline_frequency)
+                await self._event_queue.put(BarEvent(bar))
 
     def _send_msg(self, msg):
         if self._msg_client is not None:
