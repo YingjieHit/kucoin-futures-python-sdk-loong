@@ -132,10 +132,10 @@ class KcFuturesBaseCta(object):
                 bar = ccxt_binance_adapter.parse_kline(ohlcv, symbol, kline_frequency)
                 await self._event_queue.put(BarEvent(bar))
 
-    async def _subscribe_position(self, symbol):
+    async def _subscribe_position_change(self, symbol):
         await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
 
-    async def _unsubscribe_position(self, symbol):
+    async def _unsubscribe_position_change(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
 
     def _send_msg(self, msg):
