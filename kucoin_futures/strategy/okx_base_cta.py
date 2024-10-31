@@ -170,6 +170,9 @@ class OkxBaseCta(object):
 
     async def _subscribe_positions(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
+        if self._position_change_task is not None:
+            self._position_change_task.cancel()
+            self._position_change_task = None
         self._position_change_task = asyncio.create_task(self._watch_positions(symbol))
         self._is_subscribe_position = True
 
