@@ -9,7 +9,8 @@ from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.event import (EventType, BarEvent, TraderOrderEvent, PositionChangeEvent,
                                            Level2Depth5Event, CreateOrderEvent, CancelOrderEvent)
-from kucoin_futures.strategy.object import CreateOrder, CancelOrder
+from kucoin_futures.strategy.object import CreateOrder, MarketMakerCreateOrder, CreateOrder, CancelOrder
+from kucoin_futures.trade.async_trade import TradeDataAsync
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
 
 
@@ -22,6 +23,8 @@ class KcFuturesBaseCta(object):
         self._passphrase = passphrase
         self._msg_client = msg_client
         self._strategy_name = strategy_name
+
+        self._trade = TradeDataAsync(key=key, secret=secret, passphrase=passphrase)
 
         self._kc_futures_exchange = kucoinfutures({
             'apiKey': key,
@@ -36,6 +39,8 @@ class KcFuturesBaseCta(object):
 
         self._process_event_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
+        self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
+        self._process_execute_order_task: asyncio.Task | None = None
 
         self._kc_futures_markets: dict | None = None
 
@@ -53,11 +58,68 @@ class KcFuturesBaseCta(object):
         await self._load_markets()
         # 创建事件处理任务
         self._process_event_task = asyncio.create_task(self._process_event())
+        # 创建交易执行任务
+        self._process_execute_order_task = asyncio.create_task(self._execute_order_process())
         # 创建ws_client
         await self._create_ws_client()
+        # 创建订阅监控任务
+        self._subscribe_monitor_task = asyncio.create_task(self._subscribe_monitoring_process())
+
+    async def _execute_order_process(self):
+        while True:
+            try:
+                event = await self._order_task_queue.get()
+                if event.type == EventType.CREATE_MARKET_MAKER_ORDER:
+                    # 发送做市单
+                    mmo: MarketMakerCreateOrder = event.data
+                    res = await self._trade.create_market_maker_order(mmo.symbol, mmo.lever, mmo.size, mmo.price_buy,
+                                                                      mmo.price_sell, mmo.client_oid_buy,
+                                                                      mmo.client_oid_sell, mmo.post_only)
+                    # await app_logger.info_logger(f"订单执行结果{res}")
+                elif event.type == EventType.CREATE_ORDER:
+                    # 发送订单
+                    co: CreateOrder = event.data
+                    if co.type == 'limit':
+                        await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
+                                                             co.client_oid,
+                                                             postOnly=co.post_only)
+                    elif co.type == 'market':
+                        await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
+            except Exception as e:
+                msg = f"{self._strategy_name} execute_order_process Error: {str(e)}"
+                self._send_msg(msg)
+                await app_logger.error(msg)
+
+    async def _cancel_order_process(self):
+        while True:
+            try:
+                event = await self._cancel_order_task_queue.get()
+
+                if event.type == EventType.CANCEL_ALL_ORDER:
+                    # 撤销所有订单
+                    symbol = event.data
+                    await self._trade.cancel_all_limit_order(symbol)
+
+                elif event.type == EventType.CANCEL_ORDER:
+                    # 撤单
+                    co: CancelOrder = event.data
+                    if co.client_oid:
+                        res = await self._trade.cancel_order_by_clientOid(co.client_oid, co.symbol)
+                    else:
+                        await self._trade.cancel_order(co.order_id)
+            except Exception as e:
+                msg = f"{self._strategy_name} process_cancel_order Error: {str(e)}"
+                self._send_msg(msg)
+                await app_logger.error(msg)
 
     async def run(self):
         raise NotImplementedError("需要实现run")
+
+    async def _subscribe_monitoring_process(self):
+        while True:
+            msg = f"{self._strategy_name} 策略正在运行"
+            self._send_msg(msg)
+            await asyncio.sleep(60 * 60 * 24)
 
     async def _fetch_position(self, symbol, mgn_mode='isolated'):
         positions = await self._kc_futures_exchange.fetch_positions([symbol])
