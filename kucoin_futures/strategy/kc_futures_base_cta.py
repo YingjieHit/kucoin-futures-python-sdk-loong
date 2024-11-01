@@ -109,11 +109,13 @@ class KcFuturesBaseCta(object):
             #     bar = market_data_parser.parse_bar(msg)
             #     await self._event_queue.put(BarEvent(bar))
             else:
-                self._send_msg(f"{self._strategy_name} 未知的subject {msg.get('subject')}")
-                raise Exception(f"未知的subject {msg.get('subject')}")
+                msg = f"{self._strategy_name} _deal_public_msg 未知的subject msg: {msg}"
+                self._send_msg(msg)
+                raise Exception(msg)
         except Exception as e:
-            self._send_msg(f"deal_public_msg Error {str(e)}")
-            await app_logger.error(f"deal_public_msg Error {str(e)}")
+            msg = f"{self._strategy_name} _deal_public_msg Error {str(e)}"
+            self._send_msg(msg)
+            await app_logger.error(msg)
 
     async def _process_event(self):
         while True:
