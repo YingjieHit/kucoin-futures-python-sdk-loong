@@ -84,7 +84,7 @@ class KcFuturesBaseCta(object):
     async def _deal_private_msg(self, msg):
         # data = msg.get('data')
         # print("_deal_private_msg")
-        # print(msg)
+        print(msg)
         try:
             if msg.get('subject') == Subject.symbolOrderChange:
                 order = market_data_parser.parse_order(msg)
