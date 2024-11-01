@@ -8,7 +8,8 @@ from kucoin_futures.strategy.market_data_parser import market_data_parser
 from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.event import (EventType, BarEvent, TraderOrderEvent, PositionChangeEvent,
-                                           Level2Depth5Event)
+                                           Level2Depth5Event, CreateOrderEvent, CancelOrderEvent)
+from kucoin_futures.strategy.object import CreateOrder, CancelOrder
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
 
 
@@ -30,6 +31,8 @@ class KcFuturesBaseCta(object):
         })
 
         self._event_queue = asyncio.Queue()
+        self._order_task_queue = asyncio.Queue()
+        self._cancel_order_task_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
@@ -174,6 +177,21 @@ class KcFuturesBaseCta(object):
 
     async def _load_markets(self):
         self._kc_futures_markets = await self._kc_futures_exchange.load_markets(reload=True)
+
+    async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=False):
+        if type != 'market' and price is None:
+            raise ValueError("price can not be None when type is not 'market'")
+        co = CreateOrder(
+            symbol=symbol,
+            lever=lever,
+            size=size,
+            side=side,
+            price=price,
+            type=type,
+            client_oid=client_oid,
+            post_only=post_only
+        )
+        await self._order_task_queue.put(CreateOrderEvent(co))
 
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
