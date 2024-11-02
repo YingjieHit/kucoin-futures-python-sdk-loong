@@ -42,6 +42,10 @@ class KcFuturesBaseCta(object):
         self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
         self._process_execute_order_task: asyncio.Task | None = None
 
+        self._is_subscribe_level2_depth5 = False
+        self._is_subscribe_bn_kline = False
+        self._is_subscribe_position = False
+
         self._kc_futures_markets: dict | None = None
 
         self._binance_exchange = binance()
@@ -224,16 +228,20 @@ class KcFuturesBaseCta(object):
 
     async def _subscribe_position_change(self, symbol):
         await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = True
 
     async def _unsubscribe_position_change(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = False
 
     async def _subscribe_level2_depth5(self, symbol):
         # topic举例 '/contractMarket/level2Depth5:XBTUSDTM'
         await self._ws_public_client.subscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = True
 
     async def _unsubscribe_level2_depth5(self, symbol):
         await self._ws_public_client.unsubscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = False
 
     def _send_msg(self, msg):
         if self._msg_client is not None:
