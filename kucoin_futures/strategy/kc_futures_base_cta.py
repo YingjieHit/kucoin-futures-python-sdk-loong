@@ -157,8 +157,8 @@ class KcFuturesBaseCta(object):
             elif msg.get('subject') == Subject.positionChange:
                 await self._event_queue.put(PositionChangeEvent(msg.get('data')))
             else:
-                self._send_msg(f"{self._strategy_name} _deal_private_msg 未知的subject: {msg.get('subject')}")
-                print(f"_deal_private_msg 未知的subject: {msg.get('subject')}")
+                self._send_msg(f"{self._strategy_name} _deal_private_msg 未知的subject: {msg}")
+                print(f"_deal_private_msg 未知的subject: {msg}")
         except Exception as e:
             self._send_msg(f"_deal_private_msg Error {str(e)}")
             await app_logger.error(f"_deal_private_msg Error {str(e)}")
