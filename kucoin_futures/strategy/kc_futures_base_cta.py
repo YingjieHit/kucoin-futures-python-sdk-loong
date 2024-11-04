@@ -147,7 +147,6 @@ class KcFuturesBaseCta(object):
         self._ws_private_client = await KucoinFuturesWsClient.create(None, self._client, self._deal_private_msg,
                                                                      private=True)
 
-
     async def _deal_private_msg(self, msg):
         # data = msg.get('data')
         # print("_deal_private_msg")
