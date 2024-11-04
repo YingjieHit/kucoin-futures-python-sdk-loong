@@ -13,6 +13,7 @@ class EventType:
     CANCEL_ORDER = 'CANCEL_ORDER'
     ACCOUNT_BALANCE = 'ACCOUNT_BALANCE'
     POSITION_CHANGE = 'POSITION_CHANGE'
+    POSITION_SETTLEMENT = 'POSITION_SETTLEMENT'
     BAR = 'BAR'
 
     OKX_ORDER_BOOK5 = 'OKX_ORDER_BOOK5'
@@ -100,6 +101,12 @@ class PositionChangeEvent(Event):
     def __init__(self, data: dict):
         super().__init__(data)
         self.type = EventType.POSITION_CHANGE
+
+class PositionSettlementEvent(Event):
+    """持仓结算事件"""
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.type = EventType.POSITION_SETTLEMENT
 
 class OkxOrderBook5Event(Event):
     """okx order book5事件"""

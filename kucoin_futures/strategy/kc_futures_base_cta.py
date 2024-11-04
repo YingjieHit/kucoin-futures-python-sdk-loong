@@ -8,7 +8,7 @@ from kucoin_futures.strategy.market_data_parser import market_data_parser
 from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.event import (EventType, BarEvent, TraderOrderEvent, PositionChangeEvent,
-                                           Level2Depth5Event, CreateOrderEvent, CancelOrderEvent)
+                                           Level2Depth5Event, CreateOrderEvent, CancelOrderEvent, PositionSettlementEvent)
 from kucoin_futures.strategy.object import CreateOrder, MarketMakerCreateOrder, CreateOrder, CancelOrder
 from kucoin_futures.trade.async_trade import TradeDataAsync
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
@@ -156,6 +156,8 @@ class KcFuturesBaseCta(object):
                 await self._event_queue.put(TraderOrderEvent(order))
             elif msg.get('subject') == Subject.positionChange:
                 await self._event_queue.put(PositionChangeEvent(msg.get('data')))
+            elif msg.get('subject') == Subject.positionSettlement:
+                await self._event_queue.put(PositionSettlementEvent(msg.get('data')))
             else:
                 self._send_msg(f"{self._strategy_name} _deal_private_msg 未知的subject: {msg}")
                 print(f"_deal_private_msg 未知的subject: {msg}")
@@ -199,6 +201,8 @@ class KcFuturesBaseCta(object):
                 elif event.type == EventType.POSITION_CHANGE:
                     # 处理持仓变化
                     await self.on_position_change(event.data)
+                elif event.type == EventType.POSITION_SETTLEMENT:
+                    await self.on_position_settlement(event.data)
             except Exception as e:
                 print(f"{self._strategy_name} process_event Error {str(e)}")
                 self._send_msg(f"{self._strategy_name} process_event Error {str(e)}")
@@ -279,6 +283,9 @@ class KcFuturesBaseCta(object):
 
     async def on_position_change(self, position_change):
         raise NotImplementedError("需要实现on_position_change")
+
+    async def on_position_settlement(self, position_settlement):
+        pass
 
     async def on_order(self, order):
         raise NotImplementedError("需要实现on_order")
