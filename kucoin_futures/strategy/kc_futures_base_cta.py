@@ -228,6 +228,13 @@ class KcFuturesBaseCta(object):
     async def _unsubscribe_position_change(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
 
+    async def _subscribe_trade_orders(self, symbol):
+        # topic举例 '/contractMarket/tradeOrders:XBTUSDTM'
+        await self._ws_private_client.subscribe(f'/contractMarket/tradeOrders:{symbol}')
+
+    async def _unsubscribe_trade_orders(self, symbol):
+        await self._ws_private_client.unsubscribe(f'/contractMarket/tradeOrders:{symbol}')
+
     async def _subscribe_level2_depth5(self, symbol):
         # topic举例 '/contractMarket/level2Depth5:XBTUSDTM'
         await self._ws_public_client.subscribe(f'/contractMarket/level2Depth5:{symbol}')
