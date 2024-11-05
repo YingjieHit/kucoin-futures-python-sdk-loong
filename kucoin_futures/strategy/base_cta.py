@@ -28,6 +28,9 @@ class BaseCta(object):
         self._order_task_queue = asyncio.Queue()
         self._cancel_order_task_queue = asyncio.Queue()
         self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
+        self._is_subscribe_level2_depth5 = False
+        self._is_subscribe_position = False
+        self._is_subscribe_trader_order = False
 
         self._client = WsToken(key=key,
                                secret=secret,
@@ -175,22 +178,28 @@ class BaseCta(object):
     async def _subscribe_level2_depth5(self, symbol):
         # topic举例 '/contractMarket/level2Depth5:XBTUSDTM'
         await self._ws_public_client.subscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = True
 
     async def _unsubscribe_level2_depth5(self, symbol):
         await self._ws_public_client.unsubscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = False
 
     async def _subscribe_trade_orders(self, symbol):
         # topic举例 '/contractMarket/tradeOrders:XBTUSDTM'
         await self._ws_private_client.subscribe(f'/contractMarket/tradeOrders:{symbol}')
+        self._is_subscribe_trade_orders = True
 
     async def _unsubscribe_trade_orders(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contractMarket/tradeOrders:{symbol}')
+        self._is_subscribe_trade_orders = False
 
     async def _subscribe_position(self, symbol):
         await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = True
 
     async def _unsubscribe_position(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = False
 
     async def _subscribe_monitoring_process(self):
         while True:
