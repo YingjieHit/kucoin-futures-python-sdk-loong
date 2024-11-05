@@ -75,7 +75,9 @@ class BaseCta(object):
                 bar = market_data_parser.parse_bar(msg)
                 await self._event_queue.put(BarEvent(bar))
             else:
-                raise Exception(f"未知的subject {msg.get('subject')}")
+                msg = f"{self._strategy_name} 未订阅的subject {msg}"
+                self._send_msg(msg)
+                await app_logger.error(msg)
         except Exception as e:
             await app_logger.error(f"deal_public_msg Error {str(e)}")
 
