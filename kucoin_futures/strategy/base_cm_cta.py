@@ -5,6 +5,7 @@ from binance.websocket.cm_futures.async_websocket_client import AsyncCMFuturesWe
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
+from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.market_data_parser import market_data_parser
 from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
                                            Level2Depth5Event, BarEvent)
@@ -14,8 +15,9 @@ from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseCmCta(BaseCta):
-    def __init__(self, symbol, key, secret, passphrase):
-        super().__init__(symbol, key, secret, passphrase)
+    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient | None = None,
+                 strategy_name="no name"):
+        super().__init__(symbol, key, secret, passphrase, msg_client, strategy_name)
         self._bn_client = AsyncCMFuturesWebsocketClient(on_message=self._deal_public_msg)
         self._is_subscribe_bn_kline = False
 

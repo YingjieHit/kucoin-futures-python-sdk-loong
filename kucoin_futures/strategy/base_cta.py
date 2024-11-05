@@ -3,6 +3,7 @@ import asyncio
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
+from kucoin_futures.common.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.market_data_parser import market_data_parser
 from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
                                            Level2Depth5Event, BarEvent, PositionChangeEvent,
@@ -13,11 +14,14 @@ from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseCta(object):
-    def __init__(self, symbol, key, secret, passphrase):
+    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient | None = None,
+                 strategy_name="no name"):
         self._symbol = symbol
         self._key = key
         self._secret = secret
         self._passphrase = passphrase
+        self._msg_client = msg_client
+        self._strategy_name = strategy_name
 
         self._trade = TradeDataAsync(key=key, secret=secret, passphrase=passphrase)
         self._event_queue = asyncio.Queue()
@@ -192,6 +196,10 @@ class BaseCta(object):
         while True:
             await asyncio.sleep(60 * 60 * 24)
 
+    def _send_msg(self, msg):
+        if self._msg_client is not None:
+            self._msg_client.send_msg(msg)
+
     async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=True):
         if type != 'market' and price is None:
             raise ValueError("price can not be None when type is not 'market'")
@@ -228,5 +236,3 @@ class BaseCta(object):
         data = pos.get('data')
         qty = data.get('currentQty')
         return qty
-
-
