@@ -17,6 +17,7 @@ class BaseCmCta(BaseCta):
     def __init__(self, symbol, key, secret, passphrase):
         super().__init__(symbol, key, secret, passphrase)
         self._bn_client = AsyncCMFuturesWebsocketClient(on_message=self._deal_public_msg)
+        self._is_subscribe_bn_kline = False
 
     async def _deal_public_msg(self, msg: dict|str):
         try:
@@ -55,8 +56,9 @@ class BaseCmCta(BaseCta):
         symbol = KC_TO_BN_SYMBOL[symbol]
         interval = KC_TO_BN_FREQUENCY[kline_frequency]
         await self._bn_client.kline(symbol, interval)
+        self._is_subscribe_bn_kline = True
 
     async def _unsubscribe_bn_kline(self, symbol, kline_frequency):
-        raise NotImplementedError("需要实现_unsubscribe_bn_kline")
+        await self._bn_client.unsubscribe(symbol)
 
 
