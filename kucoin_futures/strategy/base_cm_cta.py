@@ -2,6 +2,7 @@ import asyncio
 import json
 
 from binance.websocket.cm_futures.async_websocket_client import AsyncCMFuturesWebsocketClient
+from binance.websocket.async_websocket_client import AsyncWebsocketClient as BnWsClient
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
@@ -61,6 +62,9 @@ class BaseCmCta(BaseCta):
         self._is_subscribe_bn_kline = True
 
     async def _unsubscribe_bn_kline(self, symbol, kline_frequency):
-        await self._bn_client.unsubscribe(symbol)
+        symbol = KC_TO_BN_SYMBOL[symbol]
+        interval = KC_TO_BN_FREQUENCY[kline_frequency]
+        await self._bn_client.kline(symbol, interval, action=BnWsClient.ACTION_UNSUBSCRIBE)
+        self._is_subscribe_bn_kline = False
 
 
