@@ -23,6 +23,7 @@ class BaseCta(object):
         self._event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
         self._cancel_order_task_queue = asyncio.Queue()
+        self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
 
         self._client = WsToken(key=key,
                                secret=secret,
@@ -50,6 +51,8 @@ class BaseCta(object):
         self._process_cancel_order_task = asyncio.create_task(self._process_cancel_order())
         # 创建ws_client
         await self._create_ws_client()
+        # 创建订阅监控任务
+        self._subscribe_monitor_task = asyncio.create_task(self._subscribe_monitoring_process())
 
     async def run(self):
         raise NotImplementedError("需要实现run")
@@ -185,6 +188,10 @@ class BaseCta(object):
     async def _unsubscribe_position(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
 
+    async def _subscribe_monitoring_process(self):
+        while True:
+            await asyncio.sleep(60 * 60 * 24)
+
     async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=True):
         if type != 'market' and price is None:
             raise ValueError("price can not be None when type is not 'market'")
@@ -221,3 +228,5 @@ class BaseCta(object):
         data = pos.get('data')
         qty = data.get('currentQty')
         return qty
+
+
