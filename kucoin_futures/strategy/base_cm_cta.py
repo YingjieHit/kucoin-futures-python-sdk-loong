@@ -36,7 +36,9 @@ class BaseCmCta(BaseCta):
                     bar = market_data_parser.parse_bar(msg)
                     await self._event_queue.put(BarEvent(bar))
                 else:
-                    print(f"未知的subject {subject}")
+                    msg = f"{self._strategy_name}未订阅的subject {msg}"
+                    self._send_msg(msg)
+                    print(msg)
             # BN接口
             elif 'e' in msg:
                 e = msg.get('e')
@@ -44,12 +46,18 @@ class BaseCmCta(BaseCta):
                     bar = market_data_parser.parse_bn_bar(msg)
                     await self._event_queue.put(BarEvent(bar))
                 else:
-                    print(f"未知的e {e}")
+                    msg = f"{self._strategy_name}未订阅的e {msg}"
+                    self._send_msg(msg)
+                    print(msg)
             else:
-                print(f"未知的msg {msg}")
+                msg = f"{self._strategy_name}未知的msg {msg}"
+                self._send_msg(msg)
+                print(msg)
         except Exception as e:
-            print(f"deal_public_msg Error {str(e)}")
-            await app_logger.error(f"deal_public_msg Error {str(e)}")
+            msg = f"{self._strategy_name} deal_public_msg Error {str(e)}"
+            self._send_msg(msg)
+            print(msg)
+            await app_logger.error(msg)
 
     async def init(self):
         await super().init()
