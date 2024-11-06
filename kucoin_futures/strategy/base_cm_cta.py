@@ -1,15 +1,11 @@
-import asyncio
 import json
 
 from binance.websocket.cm_futures.async_websocket_client import AsyncCMFuturesWebsocketClient
 from binance.websocket.async_websocket_client import AsyncWebsocketClient as BnWsClient
-from kucoin_futures.client import WsToken
-from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
-from kucoin_futures.common.msg_base_client import MsgBaseClient
+from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.market_data_parser import market_data_parser
-from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           Level2Depth5Event, BarEvent)
+from kucoin_futures.strategy.event import (Level2Depth5Event, BarEvent)
 from kucoin_futures.strategy.base_cta import BaseCta
 from kucoin_futures.common.const import KC_TO_BN_SYMBOL, KC_TO_BN_FREQUENCY
 from kucoin_futures.common.app_logger import app_logger

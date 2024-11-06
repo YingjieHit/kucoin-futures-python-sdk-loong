@@ -3,12 +3,11 @@ import asyncio
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
-from kucoin_futures.common.msg_base_client import MsgBaseClient
+from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.market_data_parser import market_data_parser
-from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           Level2Depth5Event, BarEvent, PositionChangeEvent,
+from kucoin_futures.strategy.event import (EventType, TraderOrderEvent, Level2Depth5Event, BarEvent, PositionChangeEvent,
                                            CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
-from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder
+from kucoin_futures.strategy.object import MarketMakerCreateOrder, CreateOrder, CancelOrder
 from kucoin_futures.trade.async_trade import TradeDataAsync
 from kucoin_futures.common.app_logger import app_logger
 
