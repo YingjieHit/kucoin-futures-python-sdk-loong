@@ -130,11 +130,19 @@ class BaseCta(object):
                     # 发送订单
                     co: CreateOrder = event.data
                     if co.type == 'limit':
-                        await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
+                        res = await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
                                                              co.client_oid,
                                                              postOnly=co.post_only)
+                        if res['code'] != '200000':
+                            msg = f"{self._strategy_name}下限价单失败 错误信息{res}"
+                            self._send_msg(res)
+                            await app_logger.error(msg)
                     elif co.type == 'market':
-                        await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
+                        res = await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
+                        if res['code'] != '200000':
+                            msg = f"{self._strategy_name}下市价单失败 错误信息{res}"
+                            self._send_msg(res)
+                            await app_logger.error(msg)
             except Exception as e:
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
