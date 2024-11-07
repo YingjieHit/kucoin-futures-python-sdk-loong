@@ -5,6 +5,7 @@ class Subject:
     candleStick = 'candle.stick'  # K线
     level2 = 'level2'  # level2数据
     positionChange = 'position.change'
+    positionSettlement = 'position.settlement'
 
     
 

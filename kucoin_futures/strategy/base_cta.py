@@ -3,26 +3,33 @@ import asyncio
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
 from kucoin_futures.strategy.enums import Subject
+from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 from kucoin_futures.strategy.market_data_parser import market_data_parser
-from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           Level2Depth5Event, BarEvent, PositionChangeEvent,
+from kucoin_futures.strategy.event import (EventType, TraderOrderEvent, Level2Depth5Event, BarEvent, PositionChangeEvent,
                                            CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
-from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder
+from kucoin_futures.strategy.object import MarketMakerCreateOrder, CreateOrder, CancelOrder
 from kucoin_futures.trade.async_trade import TradeDataAsync
 from kucoin_futures.common.app_logger import app_logger
 
 
 class BaseCta(object):
-    def __init__(self, symbol, key, secret, passphrase):
+    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient | None = None,
+                 strategy_name="no name"):
         self._symbol = symbol
         self._key = key
         self._secret = secret
         self._passphrase = passphrase
+        self._msg_client = msg_client
+        self._strategy_name = strategy_name
 
         self._trade = TradeDataAsync(key=key, secret=secret, passphrase=passphrase)
         self._event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
         self._cancel_order_task_queue = asyncio.Queue()
+        self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
+        self._is_subscribe_level2_depth5 = False
+        self._is_subscribe_position = False
+        self._is_subscribe_trader_order = False
 
         self._client = WsToken(key=key,
                                secret=secret,
@@ -50,6 +57,8 @@ class BaseCta(object):
         self._process_cancel_order_task = asyncio.create_task(self._process_cancel_order())
         # 创建ws_client
         await self._create_ws_client()
+        # 创建订阅监控任务
+        self._subscribe_monitor_task = asyncio.create_task(self._subscribe_monitoring_process())
 
     async def run(self):
         raise NotImplementedError("需要实现run")
@@ -65,7 +74,9 @@ class BaseCta(object):
                 bar = market_data_parser.parse_bar(msg)
                 await self._event_queue.put(BarEvent(bar))
             else:
-                raise Exception(f"未知的subject {msg.get('subject')}")
+                msg = f"{self._strategy_name} 未订阅的subject {msg}"
+                self._send_msg(msg)
+                await app_logger.error(msg)
         except Exception as e:
             await app_logger.error(f"deal_public_msg Error {str(e)}")
 
@@ -118,11 +129,19 @@ class BaseCta(object):
                     # 发送订单
                     co: CreateOrder = event.data
                     if co.type == 'limit':
-                        await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
+                        res = await self._trade.create_limit_order(co.symbol, co.side, co.lever, co.size, co.price,
                                                              co.client_oid,
                                                              postOnly=co.post_only)
+                        if res['code'] != '200000':
+                            msg = f"{self._strategy_name}下限价单失败 错误信息{res}"
+                            self._send_msg(res)
+                            await app_logger.error(msg)
                     elif co.type == 'market':
-                        await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
+                        res = await self._trade.create_market_order(co.symbol, co.size, co.side, co.lever, co.client_oid)
+                        if res['code'] != '200000':
+                            msg = f"{self._strategy_name}下市价单失败 错误信息{res}"
+                            self._send_msg(res)
+                            await app_logger.error(msg)
             except Exception as e:
                 await app_logger.error(f"execute_order_process Error {str(e)}")
 
@@ -168,22 +187,36 @@ class BaseCta(object):
     async def _subscribe_level2_depth5(self, symbol):
         # topic举例 '/contractMarket/level2Depth5:XBTUSDTM'
         await self._ws_public_client.subscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = True
 
     async def _unsubscribe_level2_depth5(self, symbol):
         await self._ws_public_client.unsubscribe(f'/contractMarket/level2Depth5:{symbol}')
+        self._is_subscribe_level2_depth5 = False
 
     async def _subscribe_trade_orders(self, symbol):
         # topic举例 '/contractMarket/tradeOrders:XBTUSDTM'
         await self._ws_private_client.subscribe(f'/contractMarket/tradeOrders:{symbol}')
+        self._is_subscribe_trade_orders = True
 
     async def _unsubscribe_trade_orders(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contractMarket/tradeOrders:{symbol}')
+        self._is_subscribe_trade_orders = False
 
     async def _subscribe_position(self, symbol):
         await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = True
 
     async def _unsubscribe_position(self, symbol):
         await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
+        self._is_subscribe_position = False
+
+    async def _subscribe_monitoring_process(self):
+        while True:
+            await asyncio.sleep(60 * 60 * 24)
+
+    def _send_msg(self, msg):
+        if self._msg_client is not None:
+            self._msg_client.send_msg(msg)
 
     async def _create_order(self, symbol, side, size, type, price=None, lever=1, client_oid='', post_only=True):
         if type != 'market' and price is None:

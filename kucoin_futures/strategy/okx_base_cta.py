@@ -2,12 +2,11 @@ import asyncio
 from ccxt.pro.okx import okx
 from ccxt.pro.binance import binance
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
-from kucoin_futures.strategy.event import (EventType, TickerEvent, TraderOrderEvent, CreateMarketMakerOrderEvent,
-                                           OkxOrderBook5Event, BarEvent, PositionChangeEvent,
-                                           CreateOrderEvent, CancelOrderEvent, CancelAllOrderEvent)
-from kucoin_futures.strategy.object import Ticker, Order, MarketMakerCreateOrder, CreateOrder, CancelOrder, Bar
+from kucoin_futures.strategy.event import (EventType, OkxOrderBook5Event, BarEvent, PositionChangeEvent,
+                                           CreateOrderEvent)
+from kucoin_futures.strategy.object import CreateOrder
 from kucoin_futures.common.app_logger import app_logger
-from kucoin_futures.common.msg_base_client import MsgBaseClient
+from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 
 
 class OkxBaseCta(object):
