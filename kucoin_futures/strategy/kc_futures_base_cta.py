@@ -160,8 +160,13 @@ class KcFuturesBaseCta(object):
                 self._send_msg(f"{self._strategy_name} _deal_private_msg 未知的subject: {msg}")
                 print(f"_deal_private_msg 未知的subject: {msg}")
         except Exception as e:
-            self._send_msg(f"_deal_private_msg Error {str(e)}")
-            await app_logger.error(f"_deal_private_msg Error {str(e)}")
+            msg = f"""
+                {self._strategy_name} _deal_private_msg error 
+                Exception: {e}
+                msg: {msg}
+            """
+            self._send_msg(msg)
+            await app_logger.error(msg)
 
     async def _deal_public_msg(self, msg):
         # data = msg.get('data')
@@ -178,11 +183,16 @@ class KcFuturesBaseCta(object):
                 self._send_msg(msg)
                 raise Exception(msg)
         except Exception as e:
-            msg = f"{self._strategy_name} _deal_public_msg Error {str(e)}"
+            msg = f"""
+            {self._strategy_name} _deal_public_msg Error 
+            Exception: {str(e)},
+            msg: {msg}
+            """
             self._send_msg(msg)
             await app_logger.error(msg)
 
     async def _process_event(self):
+        event = None
         while True:
             try:
                 event = await self._event_queue.get()
@@ -200,9 +210,14 @@ class KcFuturesBaseCta(object):
                     # 处理持仓变化
                     await self.on_position_change(event.data)
             except Exception as e:
-                print(f"{self._strategy_name} process_event Error {str(e)}")
-                self._send_msg(f"{self._strategy_name} process_event Error {str(e)}")
-                await app_logger.error(f"{self._strategy_name} process_event Error {str(e)}")
+                msg = f"""
+                    {self._strategy_name} _process_event Error 
+                    event: {event}
+                    Exception: {str(e)}
+                """
+                print(msg)
+                self._send_msg(msg)
+                await app_logger.error(msg)
 
     async def _subscribe_bn_kline(self, symbol, kline_frequency):
         if self._bn_bar_task is not None:
