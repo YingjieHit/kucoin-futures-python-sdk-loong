@@ -10,7 +10,8 @@ from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 
 
 class OkxBaseCta(object):
-    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient|None = None, strategy_name="no name"):
+    def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient | None = None,
+                 strategy_name="no name"):
         self._symbol = symbol
         self._key = key
         self._secret = secret
@@ -143,6 +144,12 @@ class OkxBaseCta(object):
         self._bn_bar_task = asyncio.create_task(self._watch_binance_kline(symbol, kline_frequency))
         self._is_subscribe_bn_kline = True
 
+    async def _unsubscribe_bn_kline(self):
+        if self._bn_bar_task is not None:
+            self._bn_bar_task.cancel()
+            self._bn_bar_task = None
+        self._is_subscribe_bn_kline = False
+
     async def _watch_binance_kline(self, symbol, kline_frequency):
         while True:
             ohlcv_list = await self._binance_exchange.watch_ohlcv(symbol, kline_frequency)
@@ -216,5 +223,3 @@ class OkxBaseCta(object):
     @property
     def contract_size(self):
         return self._okx_markets[self._symbol]['contractSize']
-
-
