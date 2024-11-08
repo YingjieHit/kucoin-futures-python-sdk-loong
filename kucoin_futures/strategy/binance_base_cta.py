@@ -8,7 +8,7 @@ from kucoin_futures.common.app_logger import app_logger
 from kucoin_futures.common.msg_client.msg_base_client import MsgBaseClient
 
 
-class BnBaseCta(object):
+class BinanceBaseCta(object):
     def __init__(self, symbol, key, secret, passphrase, msg_client: MsgBaseClient | None = None,
                  strategy_name="no name"):
         self._symbol = symbol
