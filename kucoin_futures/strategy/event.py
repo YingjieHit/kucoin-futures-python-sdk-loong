@@ -17,6 +17,7 @@ class EventType:
     BAR = 'BAR'
 
     OKX_ORDER_BOOK5 = 'OKX_ORDER_BOOK5'
+    BINANCE_ORDER_BOOK5 = 'BINANCE_ORDER_BOOK5'
 
 
 class Event(object):
@@ -113,3 +114,9 @@ class OkxOrderBook5Event(Event):
     def __init__(self, data: dict):
         super().__init__(data)
         self.type = EventType.OKX_ORDER_BOOK5
+
+class BinanceOrderBook5Event(Event):
+    """binance order book5事件"""
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.type = EventType.BINANCE_ORDER_BOOK5

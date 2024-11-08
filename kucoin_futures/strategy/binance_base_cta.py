@@ -1,7 +1,7 @@
 import asyncio
 from ccxt.pro.binance import binance
 from kucoin_futures.common.external_adapter.ccxt_binance_adapter import ccxt_binance_adapter
-from kucoin_futures.strategy.event import (EventType, OkxOrderBook5Event, BarEvent, PositionChangeEvent,
+from kucoin_futures.strategy.event import (EventType, BinanceOrderBook5Event, BarEvent, PositionChangeEvent,
                                            CreateOrderEvent)
 from kucoin_futures.strategy.object import CreateOrder
 from kucoin_futures.common.app_logger import app_logger
@@ -95,7 +95,7 @@ class BinanceBaseCta(object):
                 if event.type == EventType.BAR:
                     # 处理k线
                     await self.on_bar(event.data)
-                elif event.type == EventType.OKX_ORDER_BOOK5:
+                elif event.type == EventType.BINANCE_ORDER_BOOK5:
                     # 处理order book5
                     await self.on_order_book5(event.data)
 
@@ -171,7 +171,8 @@ class BinanceBaseCta(object):
                     'limit': 5
                 }
             )
-            await self._event_queue.put(OkxOrderBook5Event(order_book5))
+            print(order_book5)
+            await self._event_queue.put(BinanceOrderBook5Event(order_book5))
 
     async def _subscribe_positions(self, symbol):
         # TODO: 这种订阅方式，如果多次订阅可能会导致重复订阅，该问题未来需要解决
