@@ -62,7 +62,7 @@ class BinanceBaseCta(object):
         positions = await self._binance_exchange.fetch_positions([symbol])
         for position in positions:
             # cross 全仓, isolated 逐仓
-            if position['info']['mgnMode'] == mgn_mode:
+            if position['marginMode'] == mgn_mode:
                 if position is None or (position['contracts'] == 0 and position['side'] is None):
                     return 0
                 elif position['side'] == 'long':
