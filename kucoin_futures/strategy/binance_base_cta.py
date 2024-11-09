@@ -24,7 +24,6 @@ class BinanceBaseCta(object):
             'password': passphrase,
             'enableRateLimit': True,
         })
-        self._binance_exchange.verbose = True
 
         self._event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
