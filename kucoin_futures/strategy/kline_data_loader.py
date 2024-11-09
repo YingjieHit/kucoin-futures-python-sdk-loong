@@ -8,10 +8,10 @@ from ccxt import binance
 
 class KlineDataLoader(object):
 
-    def __init__(self):
+    def __init__(self, binance_exchange: binance=None):
         self.market = Market()
         self.bn_cm_futures = CMFutures()
-        self.binance = binance()
+        self.binance = binance() if binance_exchange is None else binance_exchange
 
     def get_last_n_bars(self, symbol: str, freq: str, ts: int, n: int) -> list[Bar]:
         # ts兼容s和ms
