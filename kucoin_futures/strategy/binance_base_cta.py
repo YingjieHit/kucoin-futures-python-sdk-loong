@@ -172,7 +172,6 @@ class BinanceBaseCta(object):
                     'limit': 5
                 }
             )
-            print(order_book5)
             await self._event_queue.put(BinanceOrderBook5Event(order_book5))
 
     async def _subscribe_positions(self, symbol):
