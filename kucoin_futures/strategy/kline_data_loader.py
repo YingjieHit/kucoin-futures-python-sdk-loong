@@ -5,7 +5,7 @@ from kucoin_futures.common.const import KC_TO_BN_SYMBOL, KC_TO_BN_FREQUENCY
 from binance.cm_futures import CMFutures
 from ccxt import binance
 
-
+# TODO: 该文件未来应该迁移到common
 class KlineDataLoader(object):
 
     def __init__(self, binance_exchange: binance=None):
