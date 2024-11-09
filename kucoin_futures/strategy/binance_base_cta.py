@@ -18,7 +18,9 @@ class BinanceBaseCta(object):
         self._msg_client = msg_client
         self._strategy_name = strategy_name
 
-        self._binance_exchange = binance({
+        self._binance_exchange = binance()
+
+        self._binance_trade_exchange = binance({
             'apiKey': key,
             'secret': secret,
             'password': passphrase,
@@ -59,7 +61,7 @@ class BinanceBaseCta(object):
         raise NotImplementedError("需要实现run")
 
     async def _fetch_position(self, symbol, mgn_mode='cross'):
-        positions = await self._binance_exchange.fetch_positions([symbol])
+        positions = await self._binance_trade_exchange.fetch_positions([symbol])
         for position in positions:
             # cross 全仓, isolated 逐仓
             if position['marginMode'] == mgn_mode:
@@ -117,7 +119,7 @@ class BinanceBaseCta(object):
                 if event.type == EventType.CREATE_ORDER:
                     # 发送订单
                     co: CreateOrder = event.data
-                    ret = await self._binance_exchange.create_order(
+                    ret = await self._binance_trade_exchange.create_order(
                         symbol=co.symbol,
                         type=co.type,
                         side=co.side,
@@ -183,7 +185,7 @@ class BinanceBaseCta(object):
 
     async def _watch_positions(self, symbol):
         while True:
-            positions = await self._binance_exchange.watch_positions(symbols=[symbol])
+            positions = await self._binance_trade_exchange.watch_positions(symbols=[symbol])
             for position in positions:
                 if position['symbol'] == symbol:
                     await self._event_queue.put(PositionChangeEvent(position))
