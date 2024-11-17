@@ -290,6 +290,10 @@ class KcFuturesBaseCta(object):
         )
         await self._order_task_queue.put(CreateOrderEvent(co))
 
+    async def _cancel_all_orders(self, symbol):
+        ret = await self._trade.cancel_all_limit_order(symbol)
+        return ret
+
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
 
