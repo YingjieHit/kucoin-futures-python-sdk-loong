@@ -90,6 +90,18 @@ class OkxBaseCta(object):
         )
         await self._order_task_queue.put(CreateOrderEvent(co))
 
+    async def _cancel_all_orders(self, symbol: str = None):
+        ret = await self._okx_exchange.cancel_all_orders(symbol)
+        return ret
+
+    async def _get_unfilled_orders(self, symbol: str = None):
+        ret = await self._okx_exchange.fetch_open_orders(symbol)
+        return ret
+
+    async def _cancel_orders_for_symbols(self, orders: list):
+        ret = await self._okx_exchange.cancel_orders_for_symbols(orders)
+        return ret
+
     async def _process_event(self):
         while True:
             try:

@@ -290,6 +290,10 @@ class KcFuturesBaseCta(object):
         )
         await self._order_task_queue.put(CreateOrderEvent(co))
 
+    async def _cancel_all_orders(self, symbol):
+        ret = await self._trade.cancel_all_limit_order(symbol)
+        return ret
+
 
     def _delay_execute(self, seconds, func, *args, **kwargs):
         task = asyncio.create_task(self._delay_and_execute(seconds, func, *args, **kwargs))

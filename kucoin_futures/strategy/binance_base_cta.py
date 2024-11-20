@@ -29,7 +29,7 @@ class BinanceBaseCta(object):
 
         self._event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
-        self._cancel_order_task_queue = asyncio.Queue()
+        # self._cancel_order_task_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
         self._process_execute_order_task: asyncio.Task | None = None
@@ -89,6 +89,10 @@ class BinanceBaseCta(object):
             post_only=post_only
         )
         await self._order_task_queue.put(CreateOrderEvent(co))
+
+    async def _cancel_all_orders(self, symbol: str = None):
+        res = await self._binance_trade_exchange.cancel_all_orders(symbol)
+        return res
 
     async def _process_event(self):
         while True:
