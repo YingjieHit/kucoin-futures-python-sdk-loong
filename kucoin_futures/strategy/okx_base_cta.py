@@ -91,8 +91,12 @@ class OkxBaseCta(object):
         await self._order_task_queue.put(CreateOrderEvent(co))
 
     async def _cancel_all_orders(self, symbol: str = None):
-        ret = await self._okx_exchange.cancel_all_orders(symbol)
-        return ret
+        # ret = await self._okx_exchange.cancel_all_orders(symbol)  # OKX没有该接口
+        unfilled_orders = await self._get_unfilled_orders(symbol)
+        if unfilled_orders:
+            ret = await self._cancel_orders_for_symbols(unfilled_orders)
+            return ret
+        return None
 
     async def _get_unfilled_orders(self, symbol: str = None):
         ret = await self._okx_exchange.fetch_open_orders(symbol)
@@ -101,6 +105,26 @@ class OkxBaseCta(object):
     async def _cancel_orders_for_symbols(self, orders: list):
         ret = await self._okx_exchange.cancel_orders_for_symbols(orders)
         return ret
+
+    async def _delay_cancel_all_orders(self, symbol, seconds):
+        ret = await self._delay_execute(seconds, self._cancel_all_orders, symbol)
+        return ret
+
+    def _delay_execute(self, seconds, func, *args, **kwargs):
+        task = asyncio.create_task(self._delay_and_execute(seconds, func, *args, **kwargs))
+        return task
+
+    async def _delay_and_execute(self, seconds, func, *args, **kwargs):
+        try:
+            await asyncio.sleep(seconds)
+            await func(*args, **kwargs)
+        except Exception as e:
+            msg = f"""
+                {self._strategy_name} _delay_and_execute Error 
+                Exception: {str(e)}
+            """
+            self._send_msg(msg)
+            await app_logger.error(msg)
 
     async def _process_event(self):
         while True:

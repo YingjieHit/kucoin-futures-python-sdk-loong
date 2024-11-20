@@ -94,6 +94,27 @@ class BinanceBaseCta(object):
         res = await self._binance_trade_exchange.cancel_all_orders(symbol)
         return res
 
+    async def _delay_cancel_all_orders(self, symbol, seconds):
+        ret = await self._delay_execute(seconds, self._cancel_all_orders, symbol)
+        return ret
+
+    def _delay_execute(self, seconds, func, *args, **kwargs):
+        task = asyncio.create_task(self._delay_and_execute(seconds, func, *args, **kwargs))
+        return task
+
+    async def _delay_and_execute(self, seconds, func, *args, **kwargs):
+        try:
+            await asyncio.sleep(seconds)
+            await func(*args, **kwargs)
+        except Exception as e:
+            msg = f"""
+                {self._strategy_name} _delay_and_execute Error 
+                Exception: {str(e)}
+            """
+            self._send_msg(msg)
+            await app_logger.error(msg)
+
+
     async def _process_event(self):
         while True:
             try:
