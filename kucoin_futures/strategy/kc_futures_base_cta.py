@@ -290,6 +290,23 @@ class KcFuturesBaseCta(object):
         )
         await self._order_task_queue.put(CreateOrderEvent(co))
 
+
+    def _delay_execute(self, seconds, func, *args, **kwargs):
+        task = asyncio.create_task(self._delay_and_execute(seconds, func, *args, **kwargs))
+        return task
+
+    async def _delay_and_execute(self, seconds, func, *args, **kwargs):
+        try:
+            await asyncio.sleep(seconds)
+            await func(*args, **kwargs)
+        except Exception as e:
+            msg = f"""
+                {self._strategy_name} _delay_and_execute Error 
+                Exception: {str(e)}
+            """
+            self._send_msg(msg)
+            await app_logger.error(msg)
+
     async def on_bar(self, bar):
         raise NotImplementedError("需要实现on_bar")
 
