@@ -34,10 +34,12 @@ class KcFuturesBaseCta(object):
         })
 
         self._event_queue = asyncio.Queue()
+        self._private_event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
         self._cancel_order_task_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
+        self._process_private_event_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
         self._subscribe_monitor_task: asyncio.Task | None = None  # 订阅监控协程
         self._process_execute_order_task: asyncio.Task | None = None
@@ -62,6 +64,8 @@ class KcFuturesBaseCta(object):
         await self._load_markets()
         # 创建事件处理任务
         self._process_event_task = asyncio.create_task(self._process_event())
+        # 创建私有事件处理任务
+        self._process_private_event_task = asyncio.create_task(self._process_private_event())
         # 创建交易执行任务
         self._process_execute_order_task = asyncio.create_task(self._execute_order_process())
         # 创建ws_client
@@ -153,11 +157,14 @@ class KcFuturesBaseCta(object):
         try:
             if msg.get('subject') == Subject.symbolOrderChange:
                 order = market_data_parser.parse_order(msg)
-                await self._event_queue.put(TraderOrderEvent(order))
+                await self._private_event_queue.put(TraderOrderEvent(order))
+                # await self._event_queue.put(TraderOrderEvent(order))
             elif msg.get('subject') == Subject.positionChange:
-                await self._event_queue.put(PositionChangeEvent(msg.get('data')))
+                await self._private_event_queue.put(PositionChangeEvent(msg.get('data')))
+                # await self._event_queue.put(PositionChangeEvent(msg.get('data')))
             elif msg.get('subject') == Subject.positionSettlement:
-                await self._event_queue.put(PositionSettlementEvent(msg.get('data')))
+                await self._private_event_queue.put(PositionSettlementEvent(msg.get('data')))
+                # await self._event_queue.put(PositionSettlementEvent(msg.get('data')))
             else:
                 self._send_msg(f"{self._strategy_name} _deal_private_msg 未知的subject: {msg}")
                 print(f"_deal_private_msg 未知的subject: {msg}")
@@ -205,7 +212,30 @@ class KcFuturesBaseCta(object):
                     # 处理ticker
                     await self.on_level2_depth5(event.data)
 
-                elif event.type == EventType.TRADE_ORDER:
+                # elif event.type == EventType.TRADE_ORDER:
+                #     # 处理order回报
+                #     await self.on_order(event.data)
+                # elif event.type == EventType.POSITION_CHANGE:
+                #     # 处理持仓变化
+                #     await self.on_position_change(event.data)
+                # elif event.type == EventType.POSITION_SETTLEMENT:
+                #     await self.on_position_settlement(event.data)
+            except Exception as e:
+                msg = f"""
+                    {self._strategy_name} _process_event Error 
+                    event: {event}
+                    Exception: {str(e)}
+                """
+                print(msg)
+                self._send_msg(msg)
+                await app_logger.error(msg)
+
+    async def _process_private_event(self):
+        event = None
+        while True:
+            try:
+                event = await self._private_event_queue.get()
+                if event.type == EventType.TRADE_ORDER:
                     # 处理order回报
                     await self.on_order(event.data)
                 elif event.type == EventType.POSITION_CHANGE:
@@ -215,7 +245,7 @@ class KcFuturesBaseCta(object):
                     await self.on_position_settlement(event.data)
             except Exception as e:
                 msg = f"""
-                    {self._strategy_name} _process_event Error 
+                    {self._strategy_name} _process_private_event Error 
                     event: {event}
                     Exception: {str(e)}
                 """
@@ -245,12 +275,27 @@ class KcFuturesBaseCta(object):
                 await self._event_queue.put(BarEvent(bar))
 
     async def _subscribe_position_change(self, symbol):
-        await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
-        self._is_subscribe_position = True
+        try:
+            for i in range(5):
+                await self._ws_private_client.subscribe(f'/contract/position:{symbol}')
+                self._is_subscribe_position = True
+                break
+        except Exception as e:
+            msg = f"{self._strategy_name} _subscribe_position_change error {str(e)}"
+            self._send_msg(msg)
+            print(msg)
+            await app_logger.error(msg)
+            await asyncio.sleep(3)
 
     async def _unsubscribe_position_change(self, symbol):
-        await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
-        self._is_subscribe_position = False
+        try:
+            await self._ws_private_client.unsubscribe(f'/contract/position:{symbol}')
+            self._is_subscribe_position = False
+        except Exception as e:
+            msg = f"{self._strategy_name} _unsubscribe_position_change error {str(e)}"
+            self._send_msg(msg)
+            print(msg)
+            await app_logger.error(msg)
 
     async def _subscribe_trade_orders(self, symbol):
         # topic举例 '/contractMarket/tradeOrders:XBTUSDTM'
