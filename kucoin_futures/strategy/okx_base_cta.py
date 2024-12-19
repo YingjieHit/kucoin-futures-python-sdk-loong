@@ -28,10 +28,12 @@ class OkxBaseCta(object):
         self._binance_exchange = binance()
 
         self._event_queue = asyncio.Queue()
+        self._private_event_queue = asyncio.Queue()
         self._order_task_queue = asyncio.Queue()
         self._cancel_order_task_queue = asyncio.Queue()
 
         self._process_event_task: asyncio.Task | None = None
+        self._process_private_event_task: asyncio.Task | None = None
         self._process_execute_order_task: asyncio.Task | None = None
         self._order_book5_task: asyncio.Task | None = None
         self._bn_bar_task: asyncio.Task | None = None
@@ -52,6 +54,8 @@ class OkxBaseCta(object):
         self._schedule_task = asyncio.create_task(self._process_schedule())
         # 创建事件处理任务
         self._process_event_task = asyncio.create_task(self._process_event())
+        # 创建私有事件处理任务
+        self._process_private_event_task = asyncio.create_task(self._process_private_event())
         # 创建交易执行任务
         self._process_execute_order_task = asyncio.create_task(self._execute_order())
         # 创建订阅监控任务
@@ -140,13 +144,26 @@ class OkxBaseCta(object):
                 # elif event.type == EventType.TRADE_ORDER:
                 #     # 处理order回报
                 #     await self.on_order(event.data)
-                elif event.type == EventType.POSITION_CHANGE:
-                    # 处理持仓变化
-                    await self.on_position(event.data)
+                # elif event.type == EventType.POSITION_CHANGE:
+                #     # 处理持仓变化
+                #     await self.on_position(event.data)
             except Exception as e:
                 print(f"{self._strategy_name} process_event Error {str(e)}")
                 self._send_msg(f"process_event Error {str(e)}")
                 await app_logger.error(f"process_event Error {str(e)}")
+
+    async def _process_private_event(self):
+        while True:
+            try:
+                event = await self._private_event_queue.get()
+                if event.type == EventType.POSITION_CHANGE:
+                    # 处理持仓变化
+                    await self.on_position(event.data)
+            except Exception as e:
+                msg = f"{self._strategy_name} process_private_event Error {str(e)}"
+                print(msg)
+                self._send_msg(msg)
+                await app_logger.error(msg)
 
     async def _execute_order(self):
         while True:
@@ -223,7 +240,8 @@ class OkxBaseCta(object):
             positions = await self._okx_exchange.watch_positions(symbols=[symbol])
             for position in positions:
                 if position['symbol'] == symbol:
-                    await self._event_queue.put(PositionChangeEvent(position))
+                    # await self._event_queue.put(PositionChangeEvent(position))
+                    await self._private_event_queue.put(PositionChangeEvent(position))
                     # print(f"持仓数量: {position['contracts']}")
                     # print(f"持仓方向: {position['side']}向")
                     # print(f"时间：{position['datetime']}")
