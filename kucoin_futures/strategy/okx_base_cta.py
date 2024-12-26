@@ -281,4 +281,4 @@ class OkxBaseCta(object):
     # 获取市价最大下单数量(size 张) 该接口仅适用于okx
     @property
     def max_market_order_size(self):
-        return self._okx_markets[self._symbol]['info']['maxMktSz']
+        return float(self._okx_markets[self._symbol]['info']['maxMktSz'])
