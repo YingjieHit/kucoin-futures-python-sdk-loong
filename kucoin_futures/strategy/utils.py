@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from uuid import uuid1
 from decimal import Decimal, getcontext, ROUND_HALF_UP
-from kucoin_futures.strategy.object import (Ticker, Order, AccountBalance, Bar, Level2Depth5)
+from kucoin_futures.strategy.object import (Ticker, Order, AccountBalance, Bar, Level2Depth50)
 
 
 class Utils(object):
@@ -39,6 +39,55 @@ class Utils(object):
             ask_price=float(level2_data['asks'][0][0]),  # 转换为float
             ask_size=float(level2_data['asks'][0][1]),  # 默认值0，转换为float
             ts=level2_data.get("timestamp", 0)  #
+        )
+
+    @staticmethod
+    def spot_msg_2_level2_depth50(msg: dict) -> Level2Depth50:
+        """
+        将spot的Level2depth50数据的字典转换为Level2Depth5对象，使用字典的get方法来避免KeyError。
+        msg格式举例：
+        {
+            "type": "message",
+            "topic": "/spotMarket/level2Depth50:BTC-USDT",
+            "subject": "level2",
+            "data": {
+                "asks":[
+                    ["9993","3"],    //價格, 數量
+                    ["9992","3"],
+                    ["9991","47"],
+                    ["9990","32"],
+                    ["9989","8"]
+                ],
+                "bids":[
+                    ["9988","56"],
+                    ["9987","15"],
+                    ["9986","100"],
+                    ["9985","10"],
+                    ["9984","10"]
+                ]
+                "timestamp": 1586948108193
+              }
+
+        """
+        ask_prices = []
+        ask_sizes = []
+        for ask in msg.get("data").get("asks"):
+            ask_prices.append(float(ask[0]))
+            ask_sizes.append(int(ask[1]))
+
+        bid_prices = []
+        bid_sizes = []
+        for bid in msg.get("data").get("bids"):
+            bid_prices.append(float(bid[0]))
+            bid_sizes.append(int(bid[1]))
+
+        return Level2Depth50(
+            symbol=msg.get("topic").split(":")[1],
+            ask_prices=ask_prices,
+            ask_sizes=ask_sizes,
+            bid_prices=bid_prices,
+            bid_sizes=bid_sizes,
+            ts=msg.get("data").get("timestamp")
         )
 
     @staticmethod
@@ -216,7 +265,7 @@ class Utils(object):
         保留小数位数
         """
         # 四舍五入
-        number = int(number * 10**decimal_places) / 10**decimal_places
+        number = int(number * 10 ** decimal_places) / 10 ** decimal_places
         # 将数字转换为字符串
         str_num = str(number)
         # 检查是否包含小数点
@@ -248,5 +297,6 @@ class Utils(object):
     def ts_2_beijing_hour(ts: int) -> int:
         beijing_time = Utils.ts_2_beijing_datetime(ts)
         return beijing_time.hour
+
 
 utils = Utils()
