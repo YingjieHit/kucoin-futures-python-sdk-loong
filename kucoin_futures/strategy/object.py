@@ -26,6 +26,17 @@ class Level2Depth5:
 
 
 @dataclass
+class Level2Depth50:
+    """Level2Depth5数据字段"""
+    symbol: str
+    ask_prices: list
+    ask_sizes: list
+    bid_prices: list
+    bid_sizes: list
+    ts: int
+
+
+@dataclass
 class Bar:
     """k线数据字段"""
     symbol: str
