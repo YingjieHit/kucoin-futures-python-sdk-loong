@@ -268,3 +268,9 @@ class BinanceBaseCta(object):
     @property
     def contract_size(self):
         return self._binance_markets[self._symbol]['contractSize']
+
+    # 获取市价最大下单数量(size 张) 该接口仅适用于okx
+    @property
+    def max_market_order_size(self):
+        # 格式举例 markets['WIF/USDC:USDC']['limits']['market']['max']
+        return float(self._binance_markets[self._symbol]['limits']['market']['max'])
