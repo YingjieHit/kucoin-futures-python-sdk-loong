@@ -91,6 +91,21 @@ class Utils(object):
         )
 
     @staticmethod
+    def spot_level2_depth50_2_ticker(level2_data: Level2Depth50) -> Ticker:
+        """
+        将spot的Level2depth50数据对象换为Ticker对象
+        """
+        return Ticker(
+            symbol=level2_data.symbol,
+            sequence=0,
+            bid_size=float(level2_data.bid_sizes[0]),
+            bid_price=float(level2_data.bid_prices[0]),
+            ask_price=float(level2_data.ask_prices[0]),
+            ask_size=float(level2_data.ask_sizes[0]),
+            ts=level2_data.ts
+        )
+
+    @staticmethod
     def spot_candle_2_bar(candle_data: dict) -> Bar:
         """
         将spot的candle数据的字典转换为Bar对象，使用字典的get方法来避免KeyError。
