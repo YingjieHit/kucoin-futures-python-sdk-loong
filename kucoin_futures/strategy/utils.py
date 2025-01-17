@@ -73,13 +73,13 @@ class Utils(object):
         ask_sizes = []
         for ask in msg.get("data").get("asks"):
             ask_prices.append(float(ask[0]))
-            ask_sizes.append(int(ask[1]))
+            ask_sizes.append(float(ask[1]))
 
         bid_prices = []
         bid_sizes = []
         for bid in msg.get("data").get("bids"):
             bid_prices.append(float(bid[0]))
-            bid_sizes.append(int(bid[1]))
+            bid_sizes.append(float(bid[1]))
 
         return Level2Depth50(
             symbol=msg.get("topic").split(":")[1],
